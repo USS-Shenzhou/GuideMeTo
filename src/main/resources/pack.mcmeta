@@ -1,0 +1,7 @@
+{
+  "pack": {
+    "description": "tell_me_where resources",
+    "pack_format": 15,
+    "forge:server_data_pack_format": 12
+  }
+}

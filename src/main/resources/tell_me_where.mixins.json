@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "cn.uss-shenzhou.tell_me_where.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "TellMeWhere.refmap.json",
+  "mixins": [
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
