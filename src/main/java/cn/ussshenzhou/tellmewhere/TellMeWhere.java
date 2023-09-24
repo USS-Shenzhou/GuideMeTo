@@ -2,6 +2,7 @@ package cn.ussshenzhou.tellmewhere;
 
 import cn.ussshenzhou.tellmewhere.block.ModBlockRegistry;
 import cn.ussshenzhou.tellmewhere.blockentity.ModBlockEntityTypeRegistry;
+import cn.ussshenzhou.tellmewhere.item.ModItemRegistry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -21,15 +22,12 @@ public class TellMeWhere {
 
     public static final String MODID = "tell_me_where";
 
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
-    public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
-
     public TellMeWhere() {
         MinecraftForge.EVENT_BUS.register(this);
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         ModBlockRegistry.BLOCKS.register(modEventBus);
         ModBlockEntityTypeRegistry.BLOCK_ENTITIES.register(modEventBus);
-        ITEMS.register(modEventBus);
-        CREATIVE_MODE_TABS.register(modEventBus);
+        ModItemRegistry.ITEMS.register(modEventBus);
+        ModItemRegistry.CREATIVE_MODE_TABS.register(modEventBus);
     }
 }

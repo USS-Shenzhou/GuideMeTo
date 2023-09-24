@@ -48,6 +48,6 @@ public class TestSign extends BaseEntityBlock {
     }
 
     private void openEditor(TestSignBlockEntity blockEntity) {
-        ForgeHooksClient.pushGuiLayer(Minecraft.getInstance(), new SignEditScreen(blockEntity));
+        Minecraft.getInstance().setScreen(new SignEditScreen(blockEntity));
     }
 }

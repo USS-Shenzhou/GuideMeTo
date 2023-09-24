@@ -53,7 +53,8 @@ public class SignText {
 
     @OnlyIn(Dist.CLIENT)
     public String getRawText() {
-        return getRawText(Minecraft.getInstance().getLanguageManager().getSelected());
+        String rawText = getRawText(Minecraft.getInstance().getLanguageManager().getSelected());
+        return rawText == null ? "" : rawText;
     }
 
     public void setRawText(String languageCode, String rawText) {
@@ -61,6 +62,10 @@ public class SignText {
         if (FMLEnvironment.dist.isClient()) {
             bakeTexts();
         }
+    }
+
+    public Map<String, String> getRawTexts() {
+        return rawTexts;
     }
 
     public static SignText read(CompoundTag tag) {

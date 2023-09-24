@@ -14,7 +14,9 @@ public class ImageHelper {
 
     private static final String CATEGORY_STD = "Standard";
 
-    private static final LinkedHashSet<ImageInfo> IMAGES = new LinkedHashSet<>() {{
+    public static final LinkedHashSet<ImageInfo> IMAGES = new LinkedHashSet<>();
+
+    static {
         registerImage(0, "std_question_mark", CATEGORY_STD);
         registerImage(1, "std_no_entry", CATEGORY_STD);
         registerImage(2, "std_up", CATEGORY_STD);
@@ -27,10 +29,10 @@ public class ImageHelper {
         registerImage(9, "std_right_down", CATEGORY_STD);
         registerImage(10, "std_left_back", CATEGORY_STD);
         registerImage(11, "std_right_back", CATEGORY_STD);
-    }};
+    }
 
     private static void registerImage(int index, String resourceName, String category) {
-        IMAGES.add(new ImageInfo(index, new ResourceLocation(TellMeWhere.MODID, "block/" + resourceName), category));
+        IMAGES.add(new ImageInfo(index, new ResourceLocation(TellMeWhere.MODID, "textures/block/" + resourceName + ".png"), category));
     }
 
     public static int fromString(String rawText) {
