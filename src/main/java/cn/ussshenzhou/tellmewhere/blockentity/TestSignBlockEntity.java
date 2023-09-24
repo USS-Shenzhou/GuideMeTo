@@ -18,7 +18,7 @@ public class TestSignBlockEntity extends BlockEntity {
     public static final String LIGHT = "tmw_light";
 
     private SignText signText = new SignText();
-    private int light = -1;
+    private short light = -1;
 
     public TestSignBlockEntity(BlockPos pPos, BlockState pBlockState) {
         super(ModBlockEntityTypeRegistry.TEST_SIGN.get(), pPos, pBlockState);
@@ -33,11 +33,11 @@ public class TestSignBlockEntity extends BlockEntity {
         setChanged();
     }
 
-    public int getLight() {
+    public short getLight() {
         return light;
     }
 
-    public void setLight(int light) {
+    public void setLight(short light) {
         this.light = light;
         setChanged();
     }
@@ -46,21 +46,21 @@ public class TestSignBlockEntity extends BlockEntity {
     protected void saveAdditional(CompoundTag pTag) {
         super.saveAdditional(pTag);
         signText.write(pTag);
-        pTag.putInt(LIGHT, light);
+        pTag.putShort(LIGHT, light);
     }
 
     @Override
     public void load(CompoundTag pTag) {
         super.load(pTag);
         signText = SignText.read(pTag);
-        light = pTag.getInt(LIGHT);
+        light = pTag.getShort(LIGHT);
     }
 
     @Override
     public CompoundTag getUpdateTag() {
         var tag = super.getUpdateTag();
         signText.write(tag);
-        tag.putInt(LIGHT, light);
+        tag.putShort(LIGHT, light);
         return tag;
     }
 
