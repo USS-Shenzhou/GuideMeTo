@@ -81,48 +81,53 @@ public class SignText {
 
     @OnlyIn(Dist.CLIENT)
     private void bakeTexts() {
-        bakedTexts.clear();
-        var raw = getRawText();
+        bakedTexts = bakeTexts(getRawText());
+        totalLength = 0;
+        bakedTexts.forEach(bakedText -> totalLength += bakedText.length);
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public static ArrayList<BakedText> bakeTexts(String raw) {
+        ArrayList<BakedText> list = new ArrayList<>();
         while (!raw.isEmpty()) {
             int index = raw.indexOf(SPEC_PREFIX);
             if (index == -1) {
                 //no SPEC_PREFIX: "abcde"
-                bakedTexts.add(new BakedText(raw));
+                list.add(new BakedText(raw));
                 break;
             }
             if (index == 0) {
                 if (raw.length() <= 4) {
                     //"&@d" invalid mark
                     //"&@01" valid mark
-                    bakedTexts.add(new BakedText(raw));
+                    list.add(new BakedText(raw));
                     break;
                 } else {
                     //"&@01abcde" valid mark and go on
-                    bakedTexts.add(new BakedText(raw.substring(0, 4)));
+                    list.add(new BakedText(raw.substring(0, 4)));
                     raw = raw.substring(4);
                     continue;
                 }
             }
             //"abc&@01de"
-            bakedTexts.add(new BakedText(raw.substring(0, index)));
+            list.add(new BakedText(raw.substring(0, index)));
             raw = raw.substring(index);
             continue;
         }
-        totalLength = 0;
-        bakedTexts.forEach(bakedText -> totalLength += bakedText.length);
+        return list;
     }
 
-    public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
+    public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
         poseStack.pushPose();
         for (int i = 0; i < bakedTexts.size(); i++) {
             var b = bakedTexts.get(i);
-            b.render(poseStack, buffer, packedLight, packedOverlay);
+            b.render(poseStack, buffer, packedLight);
             poseStack.translate(b.length, 0, 0);
         }
         poseStack.popPose();
     }
 
-    public class BakedText {
+    public static class BakedText {
         private BakedType type;
         private int length;
 
@@ -149,21 +154,29 @@ public class SignText {
             imageIndex = ImageHelper.fromString(rawText);
         }
 
-        public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
+        public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
+            poseStack.pushPose();
             if (type == BakedType.TEXT) {
+                //0.5: compensate shadow
+                poseStack.translate(0, -4 + 0.5f, 0);
                 Minecraft.getInstance().font.drawInBatch(text, 0, 0, 0xffffffff, false, poseStack.last().pose(), buffer, Font.DisplayMode.NORMAL, 0, packedLight, false);
             } else {
-                var image = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(ImageHelper.get(imageIndex));
-                poseStack.pushPose();
+                float scale = ImageHelper.IMAGE_SIZE / 2f;
+                poseStack.translate(scale, 0, 0);
+                var image = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(ImageHelper.get(imageIndex).getForRender());
                 var matrix = poseStack.last().pose();
-                var consumer = buffer.getBuffer(RenderType.cutout());
-                float scale = 0.5f;
-                consumer.vertex(matrix, -scale, -scale, 0).color(255, 255, 255, 255).uv(image.getU0(), image.getV0()).normal(1, 0, 0).endVertex();
-                consumer.vertex(matrix, -scale, scale, 0).color(255, 255, 255, 255).uv(image.getU0(), image.getV1()).normal(1, 0, 0).endVertex();
-                consumer.vertex(matrix, scale, scale, 0).color(255, 255, 255, 255).uv(image.getU1(), image.getV1()).normal(1, 0, 0).endVertex();
-                consumer.vertex(matrix, scale, -scale, 0).color(255, 255, 255, 255).uv(image.getU1(), image.getV0()).normal(1, 0, 0).endVertex();
-                poseStack.popPose();
+                var consumer = buffer.getBuffer(RenderType.translucent());
+                //float scale = ImageHelper.IMAGE_SIZE / 128f;
+                consumer.vertex(matrix, -scale, -scale, 0).color(255, 255, 255, 255).uv(image.getU0(), image.getV0()).uv2(0b11110000, 0b11110000).normal(1, 0, 0).endVertex();
+                consumer.vertex(matrix, -scale, scale, 0).color(255, 255, 255, 255).uv(image.getU0(), image.getV1()).uv2(0b11110000, 0b11110000).normal(1, 0, 0).endVertex();
+                consumer.vertex(matrix, scale, scale, 0).color(255, 255, 255, 255).uv(image.getU1(), image.getV1()).uv2(0b11110000, 0b11110000).normal(1, 0, 0).endVertex();
+                consumer.vertex(matrix, scale, -scale, 0).color(255, 255, 255, 255).uv(image.getU1(), image.getV0()).uv2(0b11110000, 0b11110000).normal(1, 0, 0).endVertex();
             }
+            poseStack.popPose();
+        }
+
+        public int getLength() {
+            return length;
         }
     }
 

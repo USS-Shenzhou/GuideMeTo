@@ -2,15 +2,13 @@ package cn.ussshenzhou.tellmewhere;
 
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.HashMap;
 import java.util.LinkedHashSet;
-import java.util.Map;
 
 /**
  * @author USS_Shenzhou
  */
 public class ImageHelper {
-    public static final int IMAGE_SIZE = 24;
+    public static final int IMAGE_SIZE = 12;
 
     private static final String CATEGORY_STD = "Standard";
 
@@ -32,7 +30,7 @@ public class ImageHelper {
     }
 
     private static void registerImage(int index, String resourceName, String category) {
-        IMAGES.add(new ImageInfo(index, new ResourceLocation(TellMeWhere.MODID, "textures/block/" + resourceName + ".png"), category));
+        IMAGES.add(new ImageInfo(index, resourceName, category));
     }
 
     public static int fromString(String rawText) {
@@ -45,11 +43,11 @@ public class ImageHelper {
         }
     }
 
-    public static ResourceLocation get(int index) {
-        return ((ImageInfo) IMAGES.toArray()[index]).location;
+    public static ImageInfo get(int index) {
+        return ((ImageInfo) IMAGES.toArray()[index]);
     }
 
-    public record ImageInfo(int index, ResourceLocation location, String category) {
+    public record ImageInfo(int index, String name, String category) {
         @Override
         public boolean equals(Object obj) {
             if (obj instanceof ImageInfo that) {
@@ -61,6 +59,14 @@ public class ImageHelper {
         @Override
         public int hashCode() {
             return this.index;
+        }
+
+        public ResourceLocation getForRender() {
+            return new ResourceLocation(TellMeWhere.MODID, "block/signs/" + name);
+        }
+
+        public ResourceLocation getForFile() {
+            return new ResourceLocation(TellMeWhere.MODID, "textures/block/signs/" + name + ".png");
         }
     }
 }

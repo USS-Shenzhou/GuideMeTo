@@ -20,8 +20,8 @@ public class TestSignBlockEntityRenderer implements BlockEntityRenderer<TestSign
     public void render(TestSignBlockEntity pBlockEntity, float pPartialTick, PoseStack pPoseStack, MultiBufferSource pBuffer, int pPackedLight, int pPackedOverlay) {
         pPoseStack.pushPose();
         pBlockEntity.getSignText().render(pPoseStack, pBuffer,
-                pBlockEntity.getLight() == -1 ? pPackedLight : T88Util.overrideBlockLight(pPackedLight, pBlockEntity.getLight()),
-                pPackedOverlay);
+                pBlockEntity.getLight() == -1 ? pPackedLight : T88Util.overrideBlockLight(pPackedLight, pBlockEntity.getLight())
+        );
         pPoseStack.popPose();
     }
 }

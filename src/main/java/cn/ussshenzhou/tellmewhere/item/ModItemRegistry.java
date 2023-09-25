@@ -3,6 +3,7 @@ package cn.ussshenzhou.tellmewhere.item;
 import cn.ussshenzhou.tellmewhere.TellMeWhere;
 import cn.ussshenzhou.tellmewhere.block.ModBlockRegistry;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
@@ -25,7 +26,8 @@ public class ModItemRegistry {
     public static final RegistryObject<BlockItem> TEST_SIGN = ITEMS.register("test_sign", () -> new BlockItem(ModBlockRegistry.TEST_SIGN.get(), new Item.Properties()));
 
     public static final RegistryObject<CreativeModeTab> TAB = CREATIVE_MODE_TABS.register("main", () -> CreativeModeTab.builder()
-            .withTabsImage(new ResourceLocation(TellMeWhere.MODID, "blocks/std_up.png"))
+            .withTabsImage(new ResourceLocation(TellMeWhere.MODID, "textures/block/signs/std_up.png"))
+            .title(Component.literal("Tell Me Where"))
             .build());
 
     @SubscribeEvent

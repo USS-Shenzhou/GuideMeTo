@@ -14,7 +14,7 @@ public class ImageSelectPanel extends TScrollContainer {
 
     public ImageSelectPanel(List<ImageHelper.ImageInfo> images) {
         images.forEach(imageInfo -> {
-            var button = new TImageButton(imageInfo.location(), pButton -> {
+            var button = new TImageButton(imageInfo.getForFile(), pButton -> {
                 //TODO
             });
             button.setNormalBorder(0);
