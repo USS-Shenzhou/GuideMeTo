@@ -26,7 +26,8 @@ public class TestSignBlockEntity extends BlockEntity {
 
     public Vector2i screenStart16;
     public int screenLength16;
-    public final int screenHeight = 8;
+    public final int screenHeight16 = 8;
+    public int screenDepth16 = 7;
 
     public TestSignBlockEntity(BlockPos pPos, BlockState pBlockState) {
         super(ModBlockEntityTypeRegistry.TEST_SIGN.get(), pPos, pBlockState);

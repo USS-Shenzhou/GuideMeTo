@@ -36,7 +36,6 @@ public class NewLanguagePanel extends TPanel {
 
     public NewLanguagePanel() {
         this.addAll(title, language, create);
-        title.setHorizontalAlignment(HorizontalAlignment.RIGHT);
     }
 
     @Override
