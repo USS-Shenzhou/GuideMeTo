@@ -15,6 +15,7 @@ public class ImageHelper {
     public static final LinkedHashSet<ImageInfo> IMAGES = new LinkedHashSet<>();
 
     static {
+        //max index zz = 1295
         registerImage(0, "std_question_mark", CATEGORY_STD);
         registerImage(1, "std_no_entry", CATEGORY_STD);
         registerImage(2, "std_up", CATEGORY_STD);
@@ -34,12 +35,16 @@ public class ImageHelper {
     }
 
     public static int fromString(String rawText) {
-        rawText = rawText.replace(SignText.SPEC_PREFIX, "");
-        int i = Integer.parseInt(rawText, 36);
-        if (i >= IMAGES.size()) {
-            return 0;
-        } else {
-            return i;
+        try {
+            rawText = rawText.replace(SignText.SPEC_PREFIX, "");
+            int i = Integer.parseInt(rawText, 36);
+            if (i >= IMAGES.size()) {
+                return 0;
+            } else {
+                return i;
+            }
+        } catch (NumberFormatException ignored) {
+            return -1;
         }
     }
 

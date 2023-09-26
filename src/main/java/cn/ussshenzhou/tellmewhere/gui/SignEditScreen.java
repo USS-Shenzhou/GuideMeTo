@@ -3,18 +3,18 @@ package cn.ussshenzhou.tellmewhere.gui;
 import cn.ussshenzhou.t88.gui.advanced.TLabelButton;
 import cn.ussshenzhou.t88.gui.container.TTabPageContainer;
 import cn.ussshenzhou.t88.gui.screen.TScreen;
-import cn.ussshenzhou.t88.gui.util.Border;
 import cn.ussshenzhou.t88.gui.util.LayoutHelper;
-import cn.ussshenzhou.t88.gui.widegt.TButton;
-import cn.ussshenzhou.t88.gui.widegt.TPanel;
+import cn.ussshenzhou.t88.network.NetworkHelper;
 import cn.ussshenzhou.tellmewhere.ImageHelper;
 import cn.ussshenzhou.tellmewhere.SignText;
 import cn.ussshenzhou.tellmewhere.blockentity.TestSignBlockEntity;
+import cn.ussshenzhou.tellmewhere.network.EditSignPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.TextAndImageButton;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.client.ForgeHooksClient;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,24 +24,34 @@ import java.util.List;
  * @author USS_Shenzhou
  */
 public class SignEditScreen extends TScreen {
-    private final SignContentPanel defaultPanel;
-    private final TTabPageContainer multiLanguageContainer;
-    private final TLabelButton cancel = new TLabelButton(Component.translatable("gui.tmw.editor.cancel"), pButton -> onClose(true));
-    private final TLabelButton done = new TLabelButton(Component.translatable("gui.tmw.editor.done"), pButton -> {
-        //TODO
-    });
-    private final TTabPageContainer imageSelector = new TTabPageContainer();
-
     int gap = 5;
+    BlockPos pos;
 
+    protected SignContentPanel defaultPanel;
+    protected final TTabPageContainer multiLanguageContainer = new TTabPageContainer();
+    protected final TLabelButton cancel = new TLabelButton(Component.translatable("gui.tmw.editor.cancel"), pButton -> onClose(true));
+    protected final TLabelButton done = new TLabelButton(Component.translatable("gui.tmw.editor.done"), pButton -> {
+        HashMap<String, String> map = new HashMap<>();
+        multiLanguageContainer.getTabs().forEach(tab -> {
+            if (tab.getContent() instanceof SignContentPanel panel) {
+                map.put(tab.getText().getString(), panel.editBox.getValue());
+            }
+        });
+        map.put(Minecraft.getInstance().getLanguageManager().getSelected(), defaultPanel.editBox.getValue());
+        NetworkHelper.sendToServer(new EditSignPacket(pos, map));
+        onClose(true);
+    });
+    protected final TTabPageContainer imageSelector = new TTabPageContainer();
 
     public SignEditScreen(TestSignBlockEntity blockEntity) {
         super(Component.literal("Sign Edit Screen"));
         SignText text = blockEntity.getSignText();
         defaultPanel = new SignContentPanel(text.getRawText());
+        pos = blockEntity.getBlockPos();
+        defaultPanel.setBackground(0x80000000);
         this.add(defaultPanel);
-        multiLanguageContainer = new TTabPageContainer();
         this.add(multiLanguageContainer);
+        multiLanguageContainer.setBackground(0x80000000);
         this.add(cancel);
         this.add(done);
         this.add(imageSelector);
@@ -78,6 +88,15 @@ public class SignEditScreen extends TScreen {
         imageSelector.selectTab(0);
     }
 
+    protected void insertImageRaw(String raw) {
+        if (defaultPanel.tryInsertImage(raw)) {
+            return;
+        }
+        if (multiLanguageContainer.getSelectedTab() != null && multiLanguageContainer.getSelectedTab().getContent() instanceof SignContentPanel signContentPanel) {
+            signContentPanel.tryInsertImage(raw);
+        }
+    }
+
     @Override
     public void layout() {
         defaultPanel.setBounds(gap, gap, (int) (width * 0.7 - 2 * gap), (int) (height * 0.5 - 2 * gap));
@@ -95,7 +114,11 @@ public class SignEditScreen extends TScreen {
         graphics.fill(0, 0, width, height, 0x80000000);
     }
 
-    public static class NewLanguagePanel extends TPanel {
-
+    @Override
+    public void setFocused(@Nullable GuiEventListener pListener) {
+        if (pListener == imageSelector) {
+            return;
+        }
+        super.setFocused(pListener);
     }
 }

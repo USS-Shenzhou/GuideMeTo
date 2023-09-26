@@ -178,6 +178,7 @@ dependencies {
 
     if (localFlexibleT88) {
         implementation fg.deobf("blank:t88:0.4.+")
+        annotationProcessor "blank:t88:0.4.+"
     } else {
         def t88FileId = '4721072'
         implementation fg.deobf('curse.maven:t88-663112:' + t88FileId)

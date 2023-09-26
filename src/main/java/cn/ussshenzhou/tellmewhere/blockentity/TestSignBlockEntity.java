@@ -6,9 +6,13 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector2i;
+
+import java.util.Map;
 
 /**
  * @author USS_Shenzhou
@@ -20,17 +24,31 @@ public class TestSignBlockEntity extends BlockEntity {
     private SignText signText = new SignText();
     private short light = -1;
 
+    public Vector2i screenStart16;
+    public int screenLength16;
+    public final int screenHeight = 8;
+
     public TestSignBlockEntity(BlockPos pPos, BlockState pBlockState) {
         super(ModBlockEntityTypeRegistry.TEST_SIGN.get(), pPos, pBlockState);
+
+        screenStart16 = new Vector2i(1, 1);
+        screenLength16 = 14;
     }
 
     public SignText getSignText() {
         return signText;
     }
 
-    public void setRawText(String languageCode, String rawText) {
-        signText.setRawText(languageCode, rawText);
+    public void setRawTexts(Map<String, String> languageAndText) {
+        signText = new SignText(languageAndText);
+        updated();
+    }
+
+    private void updated() {
         setChanged();
+        if (level != null) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL);
+        }
     }
 
     public short getLight() {
@@ -39,7 +57,7 @@ public class TestSignBlockEntity extends BlockEntity {
 
     public void setLight(short light) {
         this.light = light;
-        setChanged();
+        updated();
     }
 
     @Override

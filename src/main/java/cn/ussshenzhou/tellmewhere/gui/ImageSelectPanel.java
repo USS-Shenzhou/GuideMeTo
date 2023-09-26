@@ -4,6 +4,7 @@ import cn.ussshenzhou.t88.gui.advanced.TImageButton;
 import cn.ussshenzhou.t88.gui.container.TScrollContainer;
 import cn.ussshenzhou.t88.gui.widegt.TWidget;
 import cn.ussshenzhou.tellmewhere.ImageHelper;
+import cn.ussshenzhou.tellmewhere.SignText;
 
 import java.util.List;
 
@@ -15,11 +16,23 @@ public class ImageSelectPanel extends TScrollContainer {
     public ImageSelectPanel(List<ImageHelper.ImageInfo> images) {
         images.forEach(imageInfo -> {
             var button = new TImageButton(imageInfo.getForFile(), pButton -> {
-                //TODO
+                ((SignEditScreen) getTopParentScreen()).insertImageRaw(SignText.SPEC_PREFIX +
+                        (imageInfo.index() < 35 ? "0" : "")
+                        + Integer.toString(imageInfo.index(), 36)
+                );
             });
             button.setNormalBorder(0);
             this.add(button);
         });
+    }
+
+    public boolean isInChildrenRange(double pMouseX, double pMouseY) {
+        for (TWidget tWidget : this.children) {
+            if (tWidget.isInRange(pMouseX, pMouseY)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

@@ -14,6 +14,8 @@ import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 import java.util.*;
 
@@ -31,17 +33,12 @@ public class SignText {
     public SignText(Map<String, String> rawTexts) {
         this();
         this.rawTexts = rawTexts;
-    }
-
-    public SignText(String languageCode, String rawText) {
-        this();
-        rawTexts.put(languageCode, rawText);
-    }
-
-    public SignText() {
         if (FMLEnvironment.dist.isClient()) {
             bakeTexts();
         }
+    }
+
+    public SignText() {
     }
 
     public String getRawText(String languageCode) {
@@ -55,13 +52,6 @@ public class SignText {
     public String getRawText() {
         String rawText = getRawText(Minecraft.getInstance().getLanguageManager().getSelected());
         return rawText == null ? "" : rawText;
-    }
-
-    public void setRawText(String languageCode, String rawText) {
-        rawTexts.put(languageCode, rawText);
-        if (FMLEnvironment.dist.isClient()) {
-            bakeTexts();
-        }
     }
 
     public Map<String, String> getRawTexts() {
@@ -119,8 +109,7 @@ public class SignText {
 
     public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
         poseStack.pushPose();
-        for (int i = 0; i < bakedTexts.size(); i++) {
-            var b = bakedTexts.get(i);
+        for (BakedText b : bakedTexts) {
             b.render(poseStack, buffer, packedLight);
             poseStack.translate(b.length, 0, 0);
         }
@@ -152,6 +141,9 @@ public class SignText {
             type = BakedType.IMAGE;
             length = ImageHelper.IMAGE_SIZE;
             imageIndex = ImageHelper.fromString(rawText);
+            if (imageIndex == -1) {
+                initText(rawText);
+            }
         }
 
         public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
@@ -167,10 +159,10 @@ public class SignText {
                 var matrix = poseStack.last().pose();
                 var consumer = buffer.getBuffer(RenderType.translucent());
                 //float scale = ImageHelper.IMAGE_SIZE / 128f;
-                consumer.vertex(matrix, -scale, -scale, 0).color(255, 255, 255, 255).uv(image.getU0(), image.getV0()).uv2(0b11110000, 0b11110000).normal(1, 0, 0).endVertex();
-                consumer.vertex(matrix, -scale, scale, 0).color(255, 255, 255, 255).uv(image.getU0(), image.getV1()).uv2(0b11110000, 0b11110000).normal(1, 0, 0).endVertex();
-                consumer.vertex(matrix, scale, scale, 0).color(255, 255, 255, 255).uv(image.getU1(), image.getV1()).uv2(0b11110000, 0b11110000).normal(1, 0, 0).endVertex();
-                consumer.vertex(matrix, scale, -scale, 0).color(255, 255, 255, 255).uv(image.getU1(), image.getV0()).uv2(0b11110000, 0b11110000).normal(1, 0, 0).endVertex();
+                consumer.vertex(matrix, -scale, -scale, 0).color(255, 255, 255, 255).uv(image.getU0(), image.getV0()).uv2(packedLight).normal(1, 0, 0).endVertex();
+                consumer.vertex(matrix, -scale, scale, 0).color(255, 255, 255, 255).uv(image.getU0(), image.getV1()).uv2(packedLight).normal(1, 0, 0).endVertex();
+                consumer.vertex(matrix, scale, scale, 0).color(255, 255, 255, 255).uv(image.getU1(), image.getV1()).uv2(packedLight).normal(1, 0, 0).endVertex();
+                consumer.vertex(matrix, scale, -scale, 0).color(255, 255, 255, 255).uv(image.getU1(), image.getV0()).uv2(packedLight).normal(1, 0, 0).endVertex();
             }
             poseStack.popPose();
         }
