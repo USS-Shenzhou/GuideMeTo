@@ -5,10 +5,13 @@ import cn.ussshenzhou.tellmewhere.ModRenderTypes;
 import cn.ussshenzhou.tellmewhere.blockentity.TestSignBlockEntity;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraftforge.client.model.data.ModelData;
 
 /**
  * @author USS_Shenzhou
@@ -20,7 +23,11 @@ public class TestSignBlockEntityRenderer implements BlockEntityRenderer<TestSign
 
     @Override
     public void render(TestSignBlockEntity sign, float partialTick, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
+        if (sign.getLight() != -1) {
+            packedLight = T88Util.overrideBlockLight(packedLight, sign.getLight());
+        }
         poseStack.pushPose();
+        renderDisguise(sign, poseStack, buffer, packedLight, packedOverlay);
         //start from left-up, just like gui
         poseStack.translate(1, 1, sign.screenDepth16 / 16f);
         var m = poseStack.last().pose();
@@ -32,12 +39,35 @@ public class TestSignBlockEntityRenderer implements BlockEntityRenderer<TestSign
             case WEST ->
                     m.rotateAround(Axis.YP.rotation((float) Math.PI * 0.5f), -0.5f, -0.5f, -sign.screenDepth16 / 16f + 0.5f);
         }
-        if (sign.getLight() != -1) {
-            packedLight = T88Util.overrideBlockLight(packedLight, sign.getLight());
-        }
         renderBackGround(sign, poseStack, buffer, packedLight);
         renderText(sign, poseStack, buffer, packedLight);
         poseStack.popPose();
+    }
+
+    private void renderDisguise(TestSignBlockEntity sign, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
+        if (sign.getDisguiseModel() != null) {
+            poseStack.pushPose();
+            var m = poseStack.last().pose();
+            switch (sign.getBlockState().getValue(BlockStateProperties.FACING)) {
+                case SOUTH -> m.rotateAround(Axis.YP.rotation((float) Math.PI), 0.5f, 0.5f, 0.5f);
+                case EAST -> m.rotateAround(Axis.YP.rotation((float) Math.PI * -0.5f), 0.5f, 0.5f, 0.5f);
+                case WEST -> m.rotateAround(Axis.YP.rotation((float) Math.PI * 0.5f), 0.5f, 0.5f, 0.5f);
+            }
+            Minecraft.getInstance().getBlockRenderer().getModelRenderer().tesselateWithAO(sign.getLevel(),
+                    sign.getDisguiseModel(),
+                    sign.getDisguiseBlockState(),
+                    sign.getBlockPos(),
+                    poseStack,
+                    buffer.getBuffer(RenderType.translucent()),
+                    true,
+                    sign.getLevel().random,
+                    42,
+                    packedOverlay,
+                    ModelData.EMPTY,
+                    RenderType.translucent()
+            );
+            poseStack.popPose();
+        }
     }
 
     private void renderText(TestSignBlockEntity sign, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {

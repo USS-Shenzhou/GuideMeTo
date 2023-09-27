@@ -8,6 +8,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -35,8 +37,8 @@ import static net.minecraft.world.level.block.state.properties.BlockStatePropert
  * @author USS_Shenzhou
  */
 public class TestSign extends BaseEntityBlock {
-    private static final VoxelShape SHAPE_Z = Block.box(0, 10, 7, 16, 16, 9);
-    private static final VoxelShape SHAPE_X = Block.box(7, 10, 0, 9, 16, 16);
+    private static final VoxelShape SHAPE_Z = Block.box(0, 6, 7, 16, 16, 9);
+    private static final VoxelShape SHAPE_X = Block.box(7, 6, 0, 9, 16, 16);
 
     protected TestSign() {
         super(BlockBehaviour.Properties.of()
@@ -77,7 +79,26 @@ public class TestSign extends BaseEntityBlock {
     @Override
     public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
         if (pPlayer.isCreative()) {
-            if (pPlayer.level().isClientSide()) {
+            if (pHit.getDirection() != pState.getValue(FACING)) {
+                //hit other sides
+                TestSignBlockEntity signBlockEntity = (TestSignBlockEntity) pLevel.getBlockEntity(pPos);
+                Item item = pPlayer.getItemInHand(pHand).getItem();
+                if (item instanceof BlockItem blockItem) {
+                    //itemInHand can place a block
+                    BlockState blockState =  blockItem.getBlock().defaultBlockState();
+                    //try set direction
+                    if (blockState.getOptionalValue(FACING).isPresent()) {
+                        blockState.setValue(FACING, Direction.NORTH);
+                    }
+                    if (blockState.getShape(pLevel, pPos) == Shapes.block()
+                            //block placed by itemInHand is a full block
+                            && signBlockEntity.getDisguiseBlockState().getBlock() != blockItem.getBlock()) {
+                        //block placed by itemInHand is a new block
+                        signBlockEntity.setDisguise(blockState);
+                        return InteractionResult.SUCCESS;
+                    }
+                }
+            } else if (pPlayer.level().isClientSide()) {
                 openEditor((TestSignBlockEntity) pPlayer.level().getBlockEntity(pPos));
             }
             return InteractionResult.SUCCESS;

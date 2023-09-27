@@ -177,8 +177,8 @@ dependencies {
     // implementation fg.deobf("blank:coolmod-${mc_version}:${coolmod_version}")
 
     if (localFlexibleT88) {
-        implementation fg.deobf("blank:t88:0.4.+")
-        annotationProcessor "blank:t88:0.4.+"
+        implementation fg.deobf("blank:t88:0.5.+")
+        annotationProcessor "blank:t88:0.5.+"
     } else {
         def t88FileId = '4721072'
         implementation fg.deobf('curse.maven:t88-663112:' + t88FileId)
