@@ -28,19 +28,21 @@ public class TestSignBlockEntityRenderer implements BlockEntityRenderer<TestSign
         }
         poseStack.pushPose();
         renderDisguise(sign, poseStack, buffer, packedLight, packedOverlay);
-        //start from left-up, just like gui
-        poseStack.translate(1, 1, sign.screenDepth16 / 16f);
-        var m = poseStack.last().pose();
-        switch (sign.getBlockState().getValue(BlockStateProperties.FACING)) {
-            case SOUTH ->
-                    m.rotateAround(Axis.YP.rotation((float) Math.PI), -0.5f, -0.5f, -sign.screenDepth16 / 16f + 0.5f);
-            case EAST ->
-                    m.rotateAround(Axis.YP.rotation((float) Math.PI * -0.5f), -0.5f, -0.5f, -sign.screenDepth16 / 16f + 0.5f);
-            case WEST ->
-                    m.rotateAround(Axis.YP.rotation((float) Math.PI * 0.5f), -0.5f, -0.5f, -sign.screenDepth16 / 16f + 0.5f);
+        if (sign.isMaster()) {
+            //start from left-up, just like gui
+            poseStack.translate(1, 1, sign.screenDepth16 / 16f);
+            var m = poseStack.last().pose();
+            switch (sign.getBlockState().getValue(BlockStateProperties.FACING)) {
+                case SOUTH ->
+                        m.rotateAround(Axis.YP.rotation((float) Math.PI), -0.5f, -0.5f, -sign.screenDepth16 / 16f + 0.5f);
+                case EAST ->
+                        m.rotateAround(Axis.YP.rotation((float) Math.PI * -0.5f), -0.5f, -0.5f, -sign.screenDepth16 / 16f + 0.5f);
+                case WEST ->
+                        m.rotateAround(Axis.YP.rotation((float) Math.PI * 0.5f), -0.5f, -0.5f, -sign.screenDepth16 / 16f + 0.5f);
+            }
+            renderBackGround(sign, poseStack, buffer, packedLight);
+            renderText(sign, poseStack, buffer, packedLight);
         }
-        renderBackGround(sign, poseStack, buffer, packedLight);
-        renderText(sign, poseStack, buffer, packedLight);
         poseStack.popPose();
     }
 
@@ -53,6 +55,7 @@ public class TestSignBlockEntityRenderer implements BlockEntityRenderer<TestSign
                 case EAST -> m.rotateAround(Axis.YP.rotation((float) Math.PI * -0.5f), 0.5f, 0.5f, 0.5f);
                 case WEST -> m.rotateAround(Axis.YP.rotation((float) Math.PI * 0.5f), 0.5f, 0.5f, 0.5f);
             }
+            //fixme
             Minecraft.getInstance().getBlockRenderer().getModelRenderer().tesselateWithAO(sign.getLevel(),
                     sign.getDisguiseModel(),
                     sign.getDisguiseBlockState(),
@@ -68,17 +71,6 @@ public class TestSignBlockEntityRenderer implements BlockEntityRenderer<TestSign
             );
             poseStack.popPose();
         }
-    }
-
-    private void renderText(TestSignBlockEntity sign, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
-        poseStack.pushPose();
-        var m = poseStack.last().pose();
-        m.translate(-sign.screenStart16.x / 16f, -(sign.screenStart16.y + sign.screenHeight16 / 2f) / 16, -0.002f);
-        m.rotateZ((float) Math.PI);
-        m.scale(1 / 12f, 1 / 12f, 0);
-        m.scale(sign.screenHeight16 / 16f, sign.screenHeight16 / 16f, 0);
-        sign.getSignText().render(poseStack, buffer, packedLight);
-        poseStack.popPose();
     }
 
     private void renderBackGround(TestSignBlockEntity sign, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
@@ -98,6 +90,17 @@ public class TestSignBlockEntityRenderer implements BlockEntityRenderer<TestSign
         consumer.vertex(matrix, x0, y1, 0).color(0, 0, 0, 1).uv2(packedLight).endVertex();
         consumer.vertex(matrix, x1, y1, 0).color(0, 0, 0, 1).uv2(packedLight).endVertex();
         consumer.vertex(matrix, x1, y0, 0).color(0, 0, 0, 1).uv2(packedLight).endVertex();
+        poseStack.popPose();
+    }
+
+    private void renderText(TestSignBlockEntity sign, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
+        poseStack.pushPose();
+        var m = poseStack.last().pose();
+        m.translate(-sign.screenStart16.x / 16f, -(sign.screenStart16.y + sign.screenHeight16 / 2f) / 16, -0.002f);
+        m.rotateZ((float) Math.PI);
+        m.scale(1 / 12f, 1 / 12f, 0);
+        m.scale(sign.screenHeight16 / 16f, sign.screenHeight16 / 16f, 0);
+        sign.getSignText().render(poseStack, buffer, packedLight);
         poseStack.popPose();
     }
 }

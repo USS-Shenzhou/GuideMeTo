@@ -22,16 +22,17 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.phys.AABB;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Random;
 import org.joml.Vector2i;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static net.minecraft.world.level.block.state.properties.BlockStateProperties.FACING;
 
 /**
  * @author USS_Shenzhou
@@ -39,24 +40,86 @@ import java.util.Map;
 public class TestSignBlockEntity extends BlockEntity {
     public static final String RAW_TEXT = "tmw_rawtext";
     public static final String LIGHT = "tmw_light";
+    public static final String DISGUISE = "tmw_disguise";
+    public static final String SLAVE = "tmw_slave";
+    public static final String LENGTH = "tmw_length";
 
     private SignText signText = new SignText();
     private short light = -1;
-
-    public Vector2i screenStart16;
-    public int screenLength16;
-    public final int screenHeight16 = 8;
-    public int screenDepth16 = 7;
-
     private BlockState disguiseBlockState = Blocks.AIR.defaultBlockState();
+    private boolean slave = false;
+    public int screenLength16;
+
+    public final int vanillaScreenLength16 = 14;
+    public final int screenHeight16 = 8;
+    public final Vector2i screenStart16 = new Vector2i(1, 1);
+    public final int screenDepth16 = 7;
+
+
     @OnlyIn(Dist.CLIENT)
     private BakedModel disguiseModel;
 
     public TestSignBlockEntity(BlockPos pPos, BlockState pBlockState) {
         super(ModBlockEntityTypeRegistry.TEST_SIGN.get(), pPos, pBlockState);
+        screenLength16 = vanillaScreenLength16;
+    }
 
-        screenStart16 = new Vector2i(1, 1);
-        screenLength16 = 14;
+    public void neighborUpdated() {
+        this.findMaster().checkSlaves();
+    }
+
+    public TestSignBlockEntity findMaster() {
+        var t = this;
+        //get most right one
+        Direction facing = t.getBlockState().getValue(FACING);
+        while (true) {
+            BlockEntity rightEntity = level.getBlockEntity(t.getBlockPos().relative(facing.getClockWise()));
+            if (rightEntity instanceof TestSignBlockEntity right && right.getBlockState().getValue(FACING) == facing) {
+                t = right;
+            } else {
+                break;
+            }
+        }
+        return t;
+    }
+
+    public ArrayList<TestSignBlockEntity> findSlaves() {
+        ArrayList<TestSignBlockEntity> slaves = new ArrayList<>();
+        var t = this;
+        //get until most left one
+        Direction facing = t.getBlockState().getValue(FACING);
+        while (true) {
+            BlockEntity rightEntity = level.getBlockEntity(t.getBlockPos().relative(facing.getCounterClockWise()));
+            if (rightEntity instanceof TestSignBlockEntity left && left.getBlockState().getValue(FACING) == facing) {
+                t = left;
+                slaves.add(left);
+            } else {
+                break;
+            }
+        }
+        return slaves;
+    }
+
+    public void checkSlaves() {
+        var slaves = this.findSlaves();
+        this.slave = false;
+        this.screenLength16 = vanillaScreenLength16 + 16 * slaves.size();
+        slaves.forEach(TestSignBlockEntity::setSlave);
+        needUpdate();
+    }
+
+    public void setSlave() {
+        this.slave = true;
+        this.screenLength16 = vanillaScreenLength16;
+        needUpdate();
+    }
+
+    public boolean isSlave() {
+        return slave;
+    }
+
+    public boolean isMaster() {
+        return !slave;
     }
 
     public SignText getSignText() {
@@ -65,13 +128,13 @@ public class TestSignBlockEntity extends BlockEntity {
 
     public void setRawTexts(Map<String, String> languageAndText) {
         signText = new SignText(languageAndText);
-        update();
+        needUpdate();
     }
 
-    private void update() {
+    private void needUpdate() {
         setChanged();
         if (level != null) {
-            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL);
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_NONE);
         }
     }
 
@@ -81,15 +144,17 @@ public class TestSignBlockEntity extends BlockEntity {
 
     public void setLight(short light) {
         this.light = light;
-        update();
+        needUpdate();
     }
 
     @Override
-    protected void saveAdditional(CompoundTag pTag) {
-        super.saveAdditional(pTag);
-        signText.write(pTag);
-        pTag.putShort(LIGHT, light);
-        pTag.put("disguise", NbtUtils.writeBlockState(disguiseBlockState));
+    protected void saveAdditional(CompoundTag tag) {
+        super.saveAdditional(tag);
+        signText.write(tag);
+        tag.putShort(LIGHT, light);
+        tag.put(DISGUISE, NbtUtils.writeBlockState(disguiseBlockState));
+        tag.putBoolean(SLAVE, slave);
+        tag.putInt(LENGTH, screenLength16);
     }
 
     @Override
@@ -97,25 +162,29 @@ public class TestSignBlockEntity extends BlockEntity {
         var tag = super.getUpdateTag();
         signText.write(tag);
         tag.putShort(LIGHT, light);
-        tag.put("disguise", NbtUtils.writeBlockState(disguiseBlockState));
+        tag.put(DISGUISE, NbtUtils.writeBlockState(disguiseBlockState));
+        tag.putBoolean(SLAVE, slave);
+        tag.putInt(LENGTH, screenLength16);
         return tag;
     }
 
     @Override
-    public void load(CompoundTag pTag) {
-        super.load(pTag);
-        signText = SignText.read(pTag);
-        light = pTag.getShort(LIGHT);
+    public void load(CompoundTag tag) {
+        super.load(tag);
+        signText = SignText.read(tag);
+        light = tag.getShort(LIGHT);
         HolderGetter<Block> holdergetter = this.level != null ? this.level.holderLookup(Registries.BLOCK) : BuiltInRegistries.BLOCK.asLookup();
-        this.disguiseBlockState = NbtUtils.readBlockState(holdergetter, pTag.getCompound("disguise"));
+        this.disguiseBlockState = NbtUtils.readBlockState(holdergetter, tag.getCompound(DISGUISE));
         if (level != null && level.isClientSide) {
             setDisguise(disguiseBlockState);
         }
+        slave = tag.getBoolean(SLAVE);
+        screenLength16 = tag.getInt(LENGTH);
     }
 
     public void setDisguise(BlockState disguiseState) {
         disguiseBlockState = disguiseState;
-        update();
+        needUpdate();
         if (level.isClientSide) {
             calculateDisguiseModel();
         }
@@ -186,7 +255,12 @@ public class TestSignBlockEntity extends BlockEntity {
         return disguiseBlockState;
     }
 
-    //needtest
+    @Override
+    public AABB getRenderBoundingBox() {
+        var extra = this.getBlockState().getValue(FACING).getCounterClockWise().getNormal().multiply(screenLength16 / 16);
+        return super.getRenderBoundingBox().expandTowards(extra.getX(), extra.getY(), extra.getZ());
+    }
+
     @Nullable
     @Override
     public Packet<ClientGamePacketListener> getUpdatePacket() {
