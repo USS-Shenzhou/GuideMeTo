@@ -10,7 +10,7 @@ import java.util.LinkedHashSet;
 public class ImageHelper {
     public static final int IMAGE_SIZE = 12;
 
-    private static final String CATEGORY_STD = "Standard";
+    private static final String CATEGORY_STD = "Std.";
 
     public static final LinkedHashSet<ImageInfo> IMAGES = new LinkedHashSet<>();
 
@@ -28,6 +28,11 @@ public class ImageHelper {
         registerImage(9, "std_right_down", CATEGORY_STD);
         registerImage(10, "std_left_back", CATEGORY_STD);
         registerImage(11, "std_right_back", CATEGORY_STD);
+        registerImage(12, "std_clockwise", CATEGORY_STD);
+        registerImage(13, "std_counterclockwise", CATEGORY_STD);
+        registerImage(14, "std_exit", CATEGORY_STD);
+        registerImage(15, "std_tickets", CATEGORY_STD);
+        registerImage(16, "std_metro", CATEGORY_STD);
     }
 
     private static void registerImage(int index, String resourceName, String category) {

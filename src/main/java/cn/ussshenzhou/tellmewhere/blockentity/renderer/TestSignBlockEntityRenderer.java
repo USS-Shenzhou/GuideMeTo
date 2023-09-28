@@ -55,7 +55,6 @@ public class TestSignBlockEntityRenderer implements BlockEntityRenderer<TestSign
                 case EAST -> m.rotateAround(Axis.YP.rotation((float) Math.PI * -0.5f), 0.5f, 0.5f, 0.5f);
                 case WEST -> m.rotateAround(Axis.YP.rotation((float) Math.PI * 0.5f), 0.5f, 0.5f, 0.5f);
             }
-            //fixme
             Minecraft.getInstance().getBlockRenderer().getModelRenderer().tesselateWithAO(sign.getLevel(),
                     sign.getDisguiseModel(),
                     sign.getDisguiseBlockState(),

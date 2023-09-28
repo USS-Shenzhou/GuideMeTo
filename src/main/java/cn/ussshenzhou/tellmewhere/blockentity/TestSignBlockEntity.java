@@ -1,6 +1,7 @@
 package cn.ussshenzhou.tellmewhere.blockentity;
 
 import cn.ussshenzhou.t88.render.RawQuad;
+import cn.ussshenzhou.tellmewhere.DirectionUtil;
 import cn.ussshenzhou.tellmewhere.SignText;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -65,17 +66,20 @@ public class TestSignBlockEntity extends BlockEntity {
     }
 
     public void neighborUpdated() {
-        this.findMaster().checkSlaves();
+        this.findMasterAt(true).checkSlavesAt();
+        this.findMasterAt(false).checkSlavesAt();
     }
 
-    public TestSignBlockEntity findMaster() {
+    public TestSignBlockEntity findMasterAt(boolean left) {
         var t = this;
-        //get most right one
         Direction facing = t.getBlockState().getValue(FACING);
+        if (left) {
+            facing = facing.getOpposite();
+        }
         while (true) {
-            BlockEntity rightEntity = level.getBlockEntity(t.getBlockPos().relative(facing.getClockWise()));
-            if (rightEntity instanceof TestSignBlockEntity right && right.getBlockState().getValue(FACING) == facing) {
-                t = right;
+            BlockEntity rightEntity = DirectionUtil.getBlockEntityAtRight(level, t.getBlockPos(), facing);
+            if (rightEntity instanceof TestSignBlockEntity r && DirectionUtil.isParallel(r.getBlockState().getValue(FACING), facing)) {
+                t = r;
             } else {
                 break;
             }
@@ -86,13 +90,12 @@ public class TestSignBlockEntity extends BlockEntity {
     public ArrayList<TestSignBlockEntity> findSlaves() {
         ArrayList<TestSignBlockEntity> slaves = new ArrayList<>();
         var t = this;
-        //get until most left one
         Direction facing = t.getBlockState().getValue(FACING);
         while (true) {
-            BlockEntity rightEntity = level.getBlockEntity(t.getBlockPos().relative(facing.getCounterClockWise()));
-            if (rightEntity instanceof TestSignBlockEntity left && left.getBlockState().getValue(FACING) == facing) {
-                t = left;
-                slaves.add(left);
+            BlockEntity rightEntity = DirectionUtil.getBlockEntityAtLeft(level, t.getBlockPos(), facing);
+            if (rightEntity instanceof TestSignBlockEntity l && DirectionUtil.isParallel(l.getBlockState().getValue(FACING), facing)) {
+                t = l;
+                slaves.add(l);
             } else {
                 break;
             }
@@ -100,17 +103,26 @@ public class TestSignBlockEntity extends BlockEntity {
         return slaves;
     }
 
-    public void checkSlaves() {
+    public void checkSlavesAt() {
         var slaves = this.findSlaves();
         this.slave = false;
         this.screenLength16 = vanillaScreenLength16 + 16 * slaves.size();
         slaves.forEach(TestSignBlockEntity::setSlave);
+        var last = slaves.isEmpty() ? this : slaves.get(slaves.size() - 1);
+        if (last.getBlockState().getValue(FACING) != this.getBlockState().getValue(FACING)) {
+            //master of the other direction
+            last.setFree();
+        }
         needUpdate();
     }
 
     public void setSlave() {
         this.slave = true;
-        this.screenLength16 = vanillaScreenLength16;
+        needUpdate();
+    }
+
+    public void setFree() {
+        this.slave = false;
         needUpdate();
     }
 

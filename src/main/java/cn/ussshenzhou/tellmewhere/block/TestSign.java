@@ -1,5 +1,6 @@
 package cn.ussshenzhou.tellmewhere.block;
 
+import cn.ussshenzhou.tellmewhere.DirectionUtil;
 import cn.ussshenzhou.tellmewhere.blockentity.TestSignBlockEntity;
 import cn.ussshenzhou.tellmewhere.gui.SignEditScreen;
 import cn.ussshenzhou.tellmewhere.item.ModItemRegistry;
@@ -60,23 +61,7 @@ public class TestSign extends BaseEntityBlock {
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        //fixme
-        BlockPos onPos = BlockPos.containing(context.getClickLocation());
-        BlockState onState = context.getLevel().getBlockState(onPos);
-        Direction newDirection;
-        if (onState.getBlock() == ModBlockRegistry.TEST_SIGN.get()) {
-            var onDirection = onState.getValue(FACING);
-            var newPos = context.getClickedPos();
-            if (newPos.equals(onPos.relative(onDirection.getCounterClockWise())) || newPos.equals(onPos.relative(onDirection.getClockWise()))) {
-                newDirection = onDirection;
-            } else {
-                newDirection = context.getHorizontalDirection().getOpposite();
-            }
-        } else {
-            newDirection = context.getHorizontalDirection().getOpposite();
-        }
-        return defaultBlockState()
-                .setValue(FACING, newDirection);
+        return defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
     }
 
     @Override
@@ -108,14 +93,13 @@ public class TestSign extends BaseEntityBlock {
     public void destroy(LevelAccessor level, BlockPos pos, BlockState state) {
         super.destroy(level, pos, state);
         if (!level.isClientSide()) {
-            Direction facing = state.getValue(BlockStateProperties.FACING);
             //notify left
-            var left = level.getBlockEntity(pos.relative(facing.getCounterClockWise()));
+            var left = DirectionUtil.getBlockEntityAtLeft(level, pos, state);
             if (left instanceof TestSignBlockEntity e) {
                 e.neighborUpdated();
             }
             //notify right
-            var right = level.getBlockEntity(pos.relative(facing.getClockWise()));
+            var right = DirectionUtil.getBlockEntityAtRight(level, pos, state);
             if (right instanceof TestSignBlockEntity e) {
                 e.neighborUpdated();
             }
@@ -131,8 +115,23 @@ public class TestSign extends BaseEntityBlock {
             return InteractionResult.PASS;
         }
         if (level.isClientSide()) {
-            if (player.isCreative() && hit.getDirection() == state.getValue(FACING)) {
-                openEditor((TestSignBlockEntity) player.level().getBlockEntity(pPos));
+            if (player.isCreative()) {
+                var entity = (TestSignBlockEntity) player.level().getBlockEntity(pPos);
+                if (entity == null) {
+                    return InteractionResult.FAIL;
+                }
+                if (DirectionUtil.isParallel(hit.getDirection(), state.getValue(FACING))) {
+                    var rightMaster = entity.findMasterAt(false);
+                    if (rightMaster.getBlockState().getValue(FACING) == hit.getDirection()) {
+                        openEditor(rightMaster);
+                        return InteractionResult.SUCCESS;
+                    }
+                    var leftMaster = entity.findMasterAt(true);
+                    if (leftMaster.getBlockState().getValue(FACING) == hit.getDirection()) {
+                        openEditor(leftMaster);
+                    }
+                }
+                return InteractionResult.SUCCESS;
             }
         } else {
             //hit other sides
@@ -149,6 +148,7 @@ public class TestSign extends BaseEntityBlock {
                             && signBlockEntity.getDisguiseBlockState().getBlock() != blockItem.getBlock()) {
                         //block placed by itemInHand is a new block
                         signBlockEntity.setDisguise(blockState);
+                        return InteractionResult.SUCCESS;
                     }
                 }
             }
