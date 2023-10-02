@@ -1,5 +1,6 @@
 package cn.ussshenzhou.tellmewhere;
 
+import com.mojang.logging.LogUtils;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.LinkedHashSet;
@@ -35,84 +36,84 @@ public class ImageHelper {
         registerStd(15, "tickets");
         registerStd(16, "metro");
 
-        registerGoogle(102, "up");
-        registerGoogle(103, "down");
-        registerGoogle(104, "left");
-        registerGoogle(105, "right");
-        registerGoogle(106, "left_up");
-        registerGoogle(107, "left_down");
-        registerGoogle(108, "right_up");
-        registerGoogle(109, "right_down");
-        registerGoogle(110, "up_then_left");
-        registerGoogle(111, "up_then_right");
-        registerGoogle(112, "back_left");
-        registerGoogle(113, "back_right");
-        registerGoogle(114, "clockwise");
-        registerGoogle(115, "counterclockwise");
-        registerGoogle(116, "bypass_left");
-        registerGoogle(117, "bypass_right");
-        registerGoogle(118, "merge_left");
-        registerGoogle(119, "merge_right");
-        registerGoogle(120, "split_left");
-        registerGoogle(121, "split_right");
-        registerGoogle(122, "cross_passing_left");
-        registerGoogle(123, "cross_passing_right");
-        registerGoogle(124, "");
-        registerGoogle(125, "");
-        registerGoogle(126, "");
-        registerGoogle(127, "");
-        registerGoogle(128, "");
-        registerGoogle(129, "");
-        registerGoogle(130, "");
-        registerGoogle(131, "");
-        registerGoogle(132, "");
-        registerGoogle(133, "");
-        registerGoogle(134, "");
-        registerGoogle(135, "");
-        registerGoogle(136, "");
-        registerGoogle(137, "");
-        registerGoogle(138, "");
-        registerGoogle(139, "");
-        registerGoogle(140, "");
-        registerGoogle(141, "");
-        registerGoogle(142, "");
-        registerGoogle(143, "");
-        registerGoogle(144, "");
-        registerGoogle(145, "");
-        registerGoogle(146, "");
-        registerGoogle(147, "");
-        registerGoogle(148, "");
-        registerGoogle(149, "");
-        registerGoogle(150, "");
-        registerGoogle(151, "");
-        registerGoogle(152, "");
-        registerGoogle(153, "");
-        registerGoogle(154, "");
-        registerGoogle(155, "");
-        registerGoogle(156, "");
-        registerGoogle(157, "");
-        registerGoogle(158, "");
-        registerGoogle(159, "");
-        registerGoogle(160, "");
-        registerGoogle(161, "");
-        registerGoogle(162, "");
-        registerGoogle(163, "");
-        registerGoogle(164, "");
-        registerGoogle(165, "");
-        registerGoogle(166, "");
-        registerGoogle(167, "");
-        registerGoogle(168, "");
-        registerGoogle(169, "");
-        registerGoogle(170, "");
-        registerGoogle(171, "");
-        registerGoogle(172, "");
-        registerGoogle(173, "");
-        registerGoogle(174, "");
-        registerGoogle(175, "");
-        registerGoogle(176, "");
-        registerGoogle(177, "");
-        registerGoogle(178, "");
-        registerGoogle(179, "");
+        registerGoogle(202, "up");
+        registerGoogle(203, "down");
+        registerGoogle(204, "left");
+        registerGoogle(205, "right");
+        registerGoogle(206, "left_up");
+        registerGoogle(207, "left_down");
+        registerGoogle(208, "right_up");
+        registerGoogle(209, "right_down");
+        registerGoogle(210, "up_then_left");
+        registerGoogle(211, "up_then_right");
+        registerGoogle(212, "back_left");
+        registerGoogle(213, "back_right");
+        registerGoogle(214, "clockwise");
+        registerGoogle(215, "counterclockwise");
+        registerGoogle(216, "bypass_left");
+        registerGoogle(217, "bypass_right");
+        registerGoogle(218, "merge_left");
+        registerGoogle(219, "merge_right");
+        registerGoogle(220, "split_left");
+        registerGoogle(221, "split_right");
+        registerGoogle(222, "cross_passing_left");
+        registerGoogle(223, "cross_passing_right");
+        registerGoogle(224, "dual_passing");
+
+        registerGoogle(230, "start");
+        registerGoogle(231, "end");
+        registerGoogle(232, "close");
+        registerGoogle(233, "block1");
+        registerGoogle(234, "block2");
+        registerGoogle(235, "block3");
+        registerGoogle(236, "entrance1");
+        registerGoogle(237, "exit1");
+        registerGoogle(238, "entrance2");
+        registerGoogle(239, "exit2");
+
+        registerGoogle(250, "warning");
+        registerGoogle(236, "attention");
+        registerGoogle(237, "query");
+        registerGoogle(238, "info");
+        registerGoogle(239, "pin");
+        registerGoogle(240, "checkpoint");
+        registerGoogle(241, "accessibility");
+        registerGoogle(242, "accessible");
+
+        registerGoogle(250, "subway");
+        registerGoogle(251, "train");
+        registerGoogle(252, "tram");
+        registerGoogle(253, "bus");
+        registerGoogle(254, "taxi");
+        registerGoogle(255, "boat");
+        registerGoogle(256, "flight");
+        registerGoogle(257, "takeoff");
+        registerGoogle(258, "land");
+
+        registerGoogle(260, "bathroom");
+        registerGoogle(261, "baby_changing_room");
+        registerGoogle(262, "medic");
+        registerGoogle(263, "trash_can");
+        registerGoogle(264, "restaurant");
+        registerGoogle(265, "hail_to_go");
+        registerGoogle(266, "hotel");
+        registerGoogle(267, "currency_exchange");
+        registerGoogle(268, "theater");
+        registerGoogle(269, "warehouse");
+        registerGoogle(270, "write");
+        registerGoogle(271, "wifi");
+        registerGoogle(272, "translate");
+        registerGoogle(273, "timer");
+        registerGoogle(274, "music");
+
+        registerGoogle(300, "no_stroller");
+        registerGoogle(301, "do_not_touch");
+        registerGoogle(302, "do_not_step");
+        registerGoogle(303, "no_step");
+        registerGoogle(304, "smoke_free");
+        registerGoogle(305, "smoking_area");
+
+        registerGoogle(320, "airwave");
     }
 
     private static void registerStd(int index, String resourceName) {
@@ -124,7 +125,9 @@ public class ImageHelper {
     }
 
     private static void registerImage(int index, String resourceName, String category) {
-        IMAGES.add(new ImageInfo(index, resourceName, category));
+        if (!IMAGES.add(new ImageInfo(index, resourceName, category))) {
+            LogUtils.getLogger().error("Conflict image index! Index {} of {} with category {} already exists. This should not happen.", index, resourceName, category);
+        }
     }
 
     public static int fromString(String rawText) {
