@@ -3,7 +3,7 @@ package cn.ussshenzhou.tellmewhere;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 
 /**
  * @author USS_Shenzhou
@@ -14,7 +14,7 @@ public class ImageHelper {
     private static final String CATEGORY_STD = "std";
     private static final String CATEGORY_GOOGLE = "google";
 
-    public static final LinkedHashSet<ImageInfo> IMAGES = new LinkedHashSet<>();
+    public static final LinkedHashMap<Integer, ImageInfo> IMAGES = new LinkedHashMap<>();
 
     static {
         //max index zz = 1295
@@ -72,48 +72,47 @@ public class ImageHelper {
         registerGoogle(239, "exit2");
 
         registerGoogle(250, "warning");
-        registerGoogle(236, "attention");
-        registerGoogle(237, "query");
-        registerGoogle(238, "info");
-        registerGoogle(239, "pin");
-        registerGoogle(240, "checkpoint");
-        registerGoogle(241, "accessibility");
-        registerGoogle(242, "accessible");
+        registerGoogle(251, "attention");
+        registerGoogle(252, "query");
+        registerGoogle(253, "info");
+        registerGoogle(254, "pin");
+        registerGoogle(255, "checkpoint");
+        registerGoogle(256, "accessibility");
+        registerGoogle(257, "accessible");
 
-        registerGoogle(250, "subway");
-        registerGoogle(251, "train");
-        registerGoogle(252, "tram");
-        registerGoogle(253, "bus");
-        registerGoogle(254, "taxi");
-        registerGoogle(255, "boat");
-        registerGoogle(256, "flight");
-        registerGoogle(257, "takeoff");
-        registerGoogle(258, "land");
+        registerGoogle(260, "subway");
+        registerGoogle(261, "train");
+        registerGoogle(262, "tram");
+        registerGoogle(263, "bus");
+        registerGoogle(264, "taxi");
+        registerGoogle(265, "boat");
+        registerGoogle(266, "flight");
+        registerGoogle(267, "takeoff");
+        registerGoogle(268, "land");
 
-        registerGoogle(260, "bathroom");
-        registerGoogle(261, "baby_changing_room");
-        registerGoogle(262, "medic");
-        registerGoogle(263, "trash_can");
-        registerGoogle(264, "restaurant");
-        registerGoogle(265, "hail_to_go");
-        registerGoogle(266, "hotel");
-        registerGoogle(267, "currency_exchange");
-        registerGoogle(268, "theater");
-        registerGoogle(269, "warehouse");
-        registerGoogle(270, "write");
-        registerGoogle(271, "wifi");
-        registerGoogle(272, "translate");
-        registerGoogle(273, "timer");
-        registerGoogle(274, "music");
+        registerGoogle(280, "bathroom");
+        registerGoogle(281, "baby_changing_room");
+        registerGoogle(282, "medic");
+        registerGoogle(283, "trash_can");
+        registerGoogle(284, "restaurant");
+        registerGoogle(285, "hail_to_go");
+        registerGoogle(286, "hotel");
+        registerGoogle(287, "currency_exchange");
+        registerGoogle(288, "theater");
+        registerGoogle(289, "warehouse");
+        registerGoogle(290, "write");
+        registerGoogle(291, "wifi");
+        registerGoogle(292, "translate");
+        registerGoogle(293, "timer");
+        registerGoogle(294, "music");
 
-        registerGoogle(300, "no_stroller");
-        registerGoogle(301, "do_not_touch");
-        registerGoogle(302, "do_not_step");
-        registerGoogle(303, "no_step");
-        registerGoogle(304, "smoke_free");
-        registerGoogle(305, "smoking_area");
+        registerGoogle(320, "no_stroller");
+        registerGoogle(321, "do_not_touch");
+        registerGoogle(322, "do_not_step");
+        registerGoogle(323, "smoke_free");
+        registerGoogle(324, "smoking_area");
 
-        registerGoogle(320, "airwave");
+        registerGoogle(340, "airwave");
     }
 
     private static void registerStd(int index, String resourceName) {
@@ -125,16 +124,17 @@ public class ImageHelper {
     }
 
     private static void registerImage(int index, String resourceName, String category) {
-        if (!IMAGES.add(new ImageInfo(index, resourceName, category))) {
+        if (IMAGES.containsKey(index)) {
             LogUtils.getLogger().error("Conflict image index! Index {} of {} with category {} already exists. This should not happen.", index, resourceName, category);
         }
+        IMAGES.put(index, new ImageInfo(index, resourceName, category));
     }
 
     public static int fromString(String rawText) {
         try {
             rawText = rawText.replace(SignText.SPEC_PREFIX, "");
             int i = Integer.parseInt(rawText, 36);
-            if (i >= IMAGES.size()) {
+            if (i > 1295) {
                 return 0;
             } else {
                 return i;
@@ -145,7 +145,7 @@ public class ImageHelper {
     }
 
     public static ImageInfo get(int index) {
-        return ((ImageInfo) IMAGES.toArray()[index]);
+        return IMAGES.get(index);
     }
 
     public record ImageInfo(int index, String name, String category) {

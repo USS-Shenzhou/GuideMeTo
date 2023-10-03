@@ -72,7 +72,7 @@ public class SignEditScreen extends TScreen {
 
     private void initImageSelector() {
         HashMap<String, List<ImageHelper.ImageInfo>> categories = new HashMap<>();
-        ImageHelper.IMAGES.forEach(imageInfo -> {
+        ImageHelper.IMAGES.forEach((index, imageInfo) -> {
             categories.compute(imageInfo.category(), (key, imageInfos) -> {
                 if (imageInfos == null) {
                     ArrayList<ImageHelper.ImageInfo> l = new ArrayList<>();
