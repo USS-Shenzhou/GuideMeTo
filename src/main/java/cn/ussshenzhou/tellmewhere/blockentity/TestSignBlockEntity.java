@@ -1,9 +1,22 @@
 package cn.ussshenzhou.tellmewhere.blockentity;
 
+import cn.ussshenzhou.t88.render.ChunkCompileContext;
+import cn.ussshenzhou.t88.render.IFixedModelBlockEntity;
 import cn.ussshenzhou.t88.render.RawQuad;
+import cn.ussshenzhou.t88.util.BlockUtil;
+import cn.ussshenzhou.t88.util.RenderUtil;
 import cn.ussshenzhou.tellmewhere.DirectionUtil;
+import cn.ussshenzhou.tellmewhere.ModRenderTypes;
 import cn.ussshenzhou.tellmewhere.SignText;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ChunkBufferBuilderPack;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -23,22 +36,27 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 import org.joml.Vector2i;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import static net.minecraft.world.level.block.state.properties.BlockStateProperties.AXIS;
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.FACING;
 
 /**
  * @author USS_Shenzhou
  */
-public class TestSignBlockEntity extends BlockEntity {
+public class TestSignBlockEntity extends BlockEntity implements IFixedModelBlockEntity {
     public static final String RAW_TEXT = "tmw_rawtext";
     public static final String LIGHT = "tmw_light";
     public static final String DISGUISE = "tmw_disguise";
@@ -55,7 +73,6 @@ public class TestSignBlockEntity extends BlockEntity {
     public final int screenHeight16 = 8;
     public final Vector2i screenStart16 = new Vector2i(1, 1);
     public final int screenDepth16 = 7;
-
 
     @OnlyIn(Dist.CLIENT)
     private BakedModel disguiseModel;
@@ -192,6 +209,9 @@ public class TestSignBlockEntity extends BlockEntity {
         }
         slave = tag.getBoolean(SLAVE);
         screenLength16 = tag.getInt(LENGTH);
+        if (level != null && level.isClientSide) {
+            level.setBlocksDirty(getBlockPos(), getBlockState(), getBlockState());
+        }
     }
 
     public void setDisguise(BlockState disguiseState) {
@@ -202,8 +222,29 @@ public class TestSignBlockEntity extends BlockEntity {
         }
     }
 
+    public BlockState getDisguiseBlockState() {
+        return disguiseBlockState;
+    }
+
+    @Override
+    public AABB getRenderBoundingBox() {
+        var extra = this.getBlockState().getValue(FACING).getCounterClockWise().getNormal().multiply(screenLength16 / 16);
+        return super.getRenderBoundingBox().expandTowards(extra.getX(), extra.getY(), extra.getZ());
+    }
+
+    @Nullable
+    @Override
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    //----------client----------
+
     @OnlyIn(Dist.CLIENT)
     public void calculateDisguiseModel() {
+        if (disguiseBlockState.getOptionalValue(FACING).isPresent()) {
+            disguiseBlockState.setValue(FACING, Direction.NORTH);
+        }
         BakedModel blockModel = Minecraft.getInstance().getBlockRenderer().getBlockModel(disguiseBlockState);
         List<BakedQuad> quadList = new ArrayList<>();
         for (Direction d : Direction.values()) {
@@ -216,6 +257,21 @@ public class TestSignBlockEntity extends BlockEntity {
                     case UP -> rawQuad.shrink16(7, 7, 0, 0);
                     case DOWN -> rawQuad.shrink16(7, 7, 0, 0).move16(0, 6, 0);
                 }
+                //see .handleCompileContext
+                /*if (rawQuad.getDirection().getAxis() != Direction.Axis.Y) {
+                    var dir = switch (this.getBlockState().getValue(FACING)) {
+                        case SOUTH -> rawQuad.getDirection().getOpposite();
+                        default -> rawQuad.getDirection();
+                        case EAST -> rawQuad.getDirection().getClockWise();
+                        case WEST -> rawQuad.getDirection().getCounterClockWise();
+                    };
+                    rawQuad.setDirection(dir);
+                    for (RawQuad.Point p : rawQuad.getPoints()) {
+                        //var n = new Vector3f(p.get(4));
+                        var n = dir.getNormal();
+                        p.setNormal(n.getX(), n.getY(), n.getZ());
+                    }
+                }*/
                 quadList.add(rawQuad.bake());
             }
         }
@@ -256,26 +312,105 @@ public class TestSignBlockEntity extends BlockEntity {
                 return blockModel.getOverrides();
             }
         };
+        if (disguiseBlockState.getOptionalValue(FACING).isPresent()) {
+            disguiseBlockState.setValue(FACING, getBlockState().getValue(FACING));
+        }
     }
 
-    @OnlyIn(Dist.CLIENT)
+    public Direction getFacing() {
+        return BlockUtil.justGetFacing(disguiseBlockState, this.getBlockState());
+    }
+
     public BakedModel getDisguiseModel() {
         return disguiseModel;
     }
 
-    public BlockState getDisguiseBlockState() {
-        return disguiseBlockState;
+    @Override
+    public ChunkCompileContext handleCompileContext(ChunkCompileContext chunkCompileContext) {
+        return chunkCompileContext.withRenderType(RenderType.cutout())
+                .withPrepareBakedModelRender(
+                        chunkCompileContext.resetToBlock000()
+                                //fixme wrong AO
+                                .andThen(chunkCompileContext.rotateByState())
+                )
+                .withBakedModel(disguiseModel)
+                .withBlockState(disguiseBlockState)
+                .withAdditionalRender();
     }
 
     @Override
-    public AABB getRenderBoundingBox() {
-        var extra = this.getBlockState().getValue(FACING).getCounterClockWise().getNormal().multiply(screenLength16 / 16);
-        return super.getRenderBoundingBox().expandTowards(extra.getX(), extra.getY(), extra.getZ());
+    public void renderAdditional(Set<RenderType> begunRenderTypes, ChunkBufferBuilderPack builderPack, PoseStack poseStack, int packedOverlay) {
+        if (this.isMaster()) {
+            int l = getPackedLight();
+            renderBackGround(poseStack, getBuilder(begunRenderTypes, builderPack, ModRenderTypes.FILL_COLOR), l);
+            //renderTextOnlyImage(poseStack, getSimpleMultiBufferSource(begunRenderTypes, builderPack, RenderType.translucent()), l);
+            renderTextOnlyImage(poseStack,
+                    getSimpleMultiBufferSource(begunRenderTypes, builderPack,
+                            RenderType.translucent(),
+                            ModRenderTypes.TEXTa1,
+                            ModRenderTypes.TEXTb1,
+                            ModRenderTypes.TEXTc1,
+                            ModRenderTypes.TEXTa2,
+                            ModRenderTypes.TEXTb2,
+                            ModRenderTypes.TEXTc2,
+                            ModRenderTypes.TEXTa3,
+                            ModRenderTypes.TEXTb3,
+                            ModRenderTypes.TEXTc3,
+                            ModRenderTypes.TEXTa4,
+                            ModRenderTypes.TEXTb4,
+                            ModRenderTypes.TEXTc4,
+                            ModRenderTypes.TEXTa5,
+                            ModRenderTypes.TEXTb5,
+                            ModRenderTypes.TEXTc5,
+                            ModRenderTypes.TEXTa6,
+                            ModRenderTypes.TEXTb6,
+                            ModRenderTypes.TEXTc6,
+                            ModRenderTypes.TEXTa7,
+                            ModRenderTypes.TEXTb7,
+                            ModRenderTypes.TEXTc7,
+                            ModRenderTypes.TEXTa8,
+                            ModRenderTypes.TEXTb8,
+                            ModRenderTypes.TEXTc8
+                    ), l);
+        }
     }
 
-    @Nullable
-    @Override
-    public Packet<ClientGamePacketListener> getUpdatePacket() {
-        return ClientboundBlockEntityDataPacket.create(this);
+    private void moveToUpLeft(PoseStack poseStack) {
+        //start from left-up, just like gui
+        RenderUtil.rotateAroundBlockCenter(getFacing(), poseStack);
+        poseStack.translate(1, 1, this.screenDepth16 / 16f);
+    }
+
+    private void renderBackGround(PoseStack poseStack, BufferBuilder builder, int packedLight) {
+        poseStack.pushPose();
+        resetToBlock000(ModRenderTypes.FILL_COLOR, poseStack);
+        moveToUpLeft(poseStack);
+        float x0 = this.screenStart16.x / 16f;
+        float x1 = x0 + this.screenLength16 / 16f;
+        float y0 = this.screenStart16.y / 16f;
+        float y1 = y0 + this.screenHeight16 / 16f;
+        x0 *= -1;
+        x1 *= -1;
+        y0 *= -1;
+        y1 *= -1;
+        var matrix = poseStack.last().pose();
+        poseStack.translate(0, 0, -0.001f);
+        builder.vertex(matrix, x0, y0, 0).color(0, 0, 0, 1).uv2(packedLight).endVertex();
+        builder.vertex(matrix, x0, y1, 0).color(0, 0, 0, 1).uv2(packedLight).endVertex();
+        builder.vertex(matrix, x1, y1, 0).color(0, 0, 0, 1).uv2(packedLight).endVertex();
+        builder.vertex(matrix, x1, y0, 0).color(0, 0, 0, 1).uv2(packedLight).endVertex();
+        poseStack.popPose();
+    }
+
+    private void renderTextOnlyImage(PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
+        poseStack.pushPose();
+        resetToBlock000(RenderType.translucent(), poseStack);
+        moveToUpLeft(poseStack);
+        poseStack.translate(-this.screenStart16.x / 16f, -(this.screenStart16.y + this.screenHeight16 / 2f) / 16, -0.002f);
+        poseStack.rotateAround(Axis.ZP.rotation((float) Math.PI), 0, 0, 0);
+        poseStack.scale(1 / 12f, 1 / 12f, 0);
+        poseStack.scale(this.screenHeight16 / 16f, this.screenHeight16 / 16f, 0);
+        this.getSignText().render(poseStack, buffer, packedLight, SignText.BakedType.IMAGE);
+        poseStack.popPose();
     }
 }

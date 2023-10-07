@@ -44,6 +44,7 @@ public class TestSign extends BaseEntityBlock {
     protected TestSign() {
         super(BlockBehaviour.Properties.of()
                 .noOcclusion()
+                .strength(3, 6)
         );
         registerDefaultState(defaultBlockState()
                 .setValue(FACING, Direction.NORTH)
@@ -57,6 +58,14 @@ public class TestSign extends BaseEntityBlock {
             case EAST, WEST -> SHAPE_X;
             default -> Shapes.block();
         };
+    }
+
+    @Override
+    protected void spawnDestroyParticles(Level pLevel, Player pPlayer, BlockPos pPos, BlockState pState) {
+        try {
+            super.spawnDestroyParticles(pLevel, pPlayer, pPos, ((TestSignBlockEntity) pLevel.getBlockEntity(pPos)).getDisguiseBlockState());
+        } catch (Exception ignored) {
+        }
     }
 
     @Override
@@ -141,7 +150,7 @@ public class TestSign extends BaseEntityBlock {
                     BlockState blockState = blockItem.getBlock().defaultBlockState();
                     //try set direction
                     if (blockState.getOptionalValue(FACING).isPresent()) {
-                        blockState.setValue(FACING, Direction.NORTH);
+                        blockState.setValue(FACING, state.getValue(FACING));
                     }
                     if (blockState.getShape(level, pPos) == Shapes.block()
                             //block placed by itemInHand is a full block

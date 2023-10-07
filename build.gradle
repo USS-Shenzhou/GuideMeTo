@@ -183,7 +183,7 @@ dependencies {
         implementation fg.deobf('curse.maven:t88-663112:' + t88FileId)
         annotationProcessor 'curse.maven:t88-663112:' + t88FileId
     }
-    implementation fg.deobf("curse.maven:modern-ui-352491:4750809")
+    //implementation fg.deobf("curse.maven:modern-ui-352491:4750809")
 
     // For more info:
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html

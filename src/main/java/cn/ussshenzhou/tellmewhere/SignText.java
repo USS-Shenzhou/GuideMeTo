@@ -17,6 +17,7 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 /**
@@ -107,10 +108,10 @@ public class SignText {
         return list;
     }
 
-    public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
+    public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight, @Nullable BakedType only) {
         poseStack.pushPose();
         for (BakedText b : bakedTexts) {
-            b.render(poseStack, buffer, packedLight);
+            b.render(poseStack, buffer, packedLight, only);
             poseStack.translate(b.length, 0, 0);
         }
         poseStack.popPose();
@@ -146,13 +147,29 @@ public class SignText {
             }
         }
 
-        public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
+        public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight, @Nullable BakedType only) {
             poseStack.pushPose();
+            if (only == null) {
+                renderText(poseStack, buffer, packedLight);
+                renderImage(poseStack, buffer, packedLight);
+            } else if (only == BakedType.TEXT) {
+                renderText(poseStack, buffer, packedLight);
+            } else if (only == BakedType.IMAGE) {
+                renderImage(poseStack, buffer, packedLight);
+            }
+            poseStack.popPose();
+        }
+
+        public void renderText(PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
             if (type == BakedType.TEXT) {
-                //0.5: compensate shadow
+                //0.5: to compensate shadow
                 poseStack.translate(0, -4 + 0.5f, 0);
                 Minecraft.getInstance().font.drawInBatch(text, 0, 0, 0xffffffff, false, poseStack.last().pose(), buffer, Font.DisplayMode.NORMAL, 0, packedLight, false);
-            } else {
+            }
+        }
+
+        public void renderImage(PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
+            if (type == BakedType.IMAGE) {
                 float scale = ImageHelper.IMAGE_SIZE / 2f;
                 poseStack.translate(scale, 0, 0);
                 var image = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(ImageHelper.get(imageIndex).getForRender());
@@ -164,7 +181,6 @@ public class SignText {
                 consumer.vertex(matrix, scale, scale, 0).color(255, 255, 255, 255).uv(image.getU1(), image.getV1()).uv2(packedLight).normal(1, 0, 0).endVertex();
                 consumer.vertex(matrix, scale, -scale, 0).color(255, 255, 255, 255).uv(image.getU1(), image.getV0()).uv2(packedLight).normal(1, 0, 0).endVertex();
             }
-            poseStack.popPose();
         }
 
         public int getLength() {
