@@ -345,33 +345,7 @@ public class TestSignBlockEntity extends BlockEntity implements IFixedModelBlock
             renderBackGround(poseStack, getBuilder(begunRenderTypes, builderPack, ModRenderTypes.FILL_COLOR), l);
             //renderTextOnlyImage(poseStack, getSimpleMultiBufferSource(begunRenderTypes, builderPack, RenderType.translucent()), l);
             renderTextOnlyImage(poseStack,
-                    getSimpleMultiBufferSource(begunRenderTypes, builderPack,
-                            RenderType.translucent(),
-                            ModRenderTypes.TEXTa1,
-                            ModRenderTypes.TEXTb1,
-                            ModRenderTypes.TEXTc1,
-                            ModRenderTypes.TEXTa2,
-                            ModRenderTypes.TEXTb2,
-                            ModRenderTypes.TEXTc2,
-                            ModRenderTypes.TEXTa3,
-                            ModRenderTypes.TEXTb3,
-                            ModRenderTypes.TEXTc3,
-                            ModRenderTypes.TEXTa4,
-                            ModRenderTypes.TEXTb4,
-                            ModRenderTypes.TEXTc4,
-                            ModRenderTypes.TEXTa5,
-                            ModRenderTypes.TEXTb5,
-                            ModRenderTypes.TEXTc5,
-                            ModRenderTypes.TEXTa6,
-                            ModRenderTypes.TEXTb6,
-                            ModRenderTypes.TEXTc6,
-                            ModRenderTypes.TEXTa7,
-                            ModRenderTypes.TEXTb7,
-                            ModRenderTypes.TEXTc7,
-                            ModRenderTypes.TEXTa8,
-                            ModRenderTypes.TEXTb8,
-                            ModRenderTypes.TEXTc8
-                    ), l);
+                    getSimpleMultiBufferSource(begunRenderTypes, builderPack, RenderType.translucent()), l);
         }
     }
 
