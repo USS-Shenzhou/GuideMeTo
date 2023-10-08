@@ -7,7 +7,7 @@ import cn.ussshenzhou.t88.gui.util.LayoutHelper;
 import cn.ussshenzhou.t88.network.NetworkHelper;
 import cn.ussshenzhou.tellmewhere.ImageHelper;
 import cn.ussshenzhou.tellmewhere.SignText;
-import cn.ussshenzhou.tellmewhere.blockentity.TestSignBlockEntity;
+import cn.ussshenzhou.tellmewhere.blockentity.SignBlockEntity;
 import cn.ussshenzhou.tellmewhere.network.EditSignPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -43,7 +43,7 @@ public class SignEditScreen extends TScreen {
     });
     protected final TTabPageContainer imageSelector = new TTabPageContainer();
 
-    public SignEditScreen(TestSignBlockEntity blockEntity) {
+    public SignEditScreen(SignBlockEntity blockEntity) {
         super(Component.literal("Sign Edit Screen"));
         SignText text = blockEntity.getSignText();
         defaultPanel = new SignContentPanel(text.getRawText());

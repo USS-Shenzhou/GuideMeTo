@@ -39,7 +39,7 @@ public class SignContentPanel extends TPanel {
                 //prevent losing focus when click images
                 var screen = (SignEditScreen) SignContentPanel.this.getTopParentScreen();
                 //noinspection RedundantIfStatement
-                if (((ImageSelectPanel) screen.imageSelector.getSelectedTab().getContent()).isInChildrenRange(pMouseX, pMouseY)) {
+                if (screen.imageSelector.isInRange(pMouseX, pMouseY)) {
                     return true;
                 }
             }
@@ -92,7 +92,7 @@ public class SignContentPanel extends TPanel {
         pose.translate(this.getXT() + (this.width - totalLength * scale) / 2f, this.getYT() + (this.height - 24) / 2f, 0);
         pose.scale(scale, scale, 0);
         for (SignText.BakedText text : bakedTextList) {
-            text.render(pose, buffer, 0b11110000,null);
+            text.render(pose, buffer, 0b11110000, null);
             pose.translate(text.getLength(), 0, 0);
         }
         pose.popPose();

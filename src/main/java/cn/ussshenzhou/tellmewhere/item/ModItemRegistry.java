@@ -23,7 +23,11 @@ public class ModItemRegistry {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, TellMeWhere.MODID);
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, TellMeWhere.MODID);
 
-    public static final RegistryObject<BlockItem> TEST_SIGN = ITEMS.register("test_sign", () -> new BlockItem(ModBlockRegistry.TEST_SIGN.get(), new Item.Properties()));
+    public static final RegistryObject<BlockItem> SIGN_HANG_THIN = ITEMS.register("sign_hang_thin", () -> new BlockItem(ModBlockRegistry.SIGN_HANG_THIN.get(), new Item.Properties()));
+    public static final RegistryObject<BlockItem> SIGN_HANG_THICK = ITEMS.register("sign_hang_thick", () -> new BlockItem(ModBlockRegistry.SIGN_HANG_THICK.get(), new Item.Properties()));
+    public static final RegistryObject<BlockItem> SIGN_STAND_THIN = ITEMS.register("sign_stand_thin", () -> new BlockItem(ModBlockRegistry.SIGN_STAND_THIN.get(), new Item.Properties()));
+    public static final RegistryObject<BlockItem> SIGN_STAND_THICK = ITEMS.register("sign_stand_thick", () -> new BlockItem(ModBlockRegistry.SIGN_STAND_THICK.get(), new Item.Properties()));
+
 
     public static final RegistryObject<CreativeModeTab> TAB = CREATIVE_MODE_TABS.register("main", () -> CreativeModeTab.builder()
             .withTabsImage(new ResourceLocation(TellMeWhere.MODID, "textures/block/signs/std_up.png"))
@@ -33,7 +37,10 @@ public class ModItemRegistry {
     @SubscribeEvent
     public static void onBuildContents(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == TAB.getKey()) {
-            event.accept(TEST_SIGN);
+            event.accept(SIGN_HANG_THIN);
+            event.accept(SIGN_HANG_THICK);
+            event.accept(SIGN_STAND_THIN);
+            event.accept(SIGN_STAND_THICK);
         }
     }
 }

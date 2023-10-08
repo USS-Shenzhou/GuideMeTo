@@ -1,0 +1,9 @@
+{
+  "gui.tmw.editor.cancel": "取消",
+  "gui.tmw.editor.done": "完成",
+
+  "block.tell_me_where.sign_hang_thin": "标志牌 §o挂式 薄",
+  "block.tell_me_where.sign_hang_thick": "标志牌 §o挂式 厚",
+  "block.tell_me_where.sign_stand_thin": "标志牌 §o立式 薄",
+  "block.tell_me_where.sign_stand_thick": "标志牌 §o立式 厚"
+}

@@ -5,7 +5,7 @@ import cn.ussshenzhou.t88.network.annotation.Decoder;
 import cn.ussshenzhou.t88.network.annotation.Encoder;
 import cn.ussshenzhou.t88.network.annotation.NetPacket;
 import cn.ussshenzhou.tellmewhere.TellMeWhere;
-import cn.ussshenzhou.tellmewhere.blockentity.TestSignBlockEntity;
+import cn.ussshenzhou.tellmewhere.blockentity.SignBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkDirection;
@@ -43,8 +43,8 @@ public class EditSignPacket {
     public void handler(Supplier<NetworkEvent.Context> context) {
         if (context.get().getDirection().equals(NetworkDirection.PLAY_TO_SERVER)) {
             var level = context.get().getSender().level();
-            if (context.get().getSender().isCreative() && level.isLoaded(pos) && level.getBlockEntity(pos) instanceof TestSignBlockEntity testSignBlockEntity) {
-                testSignBlockEntity.setRawTexts(languageAndText);
+            if (context.get().getSender().isCreative() && level.isLoaded(pos) && level.getBlockEntity(pos) instanceof SignBlockEntity signBlockEntity) {
+                signBlockEntity.setRawTexts(languageAndText);
             }
         } else {
         }

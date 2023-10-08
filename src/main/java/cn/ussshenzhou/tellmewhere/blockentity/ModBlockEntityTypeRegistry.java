@@ -14,7 +14,11 @@ import net.minecraftforge.registries.RegistryObject;
 public class ModBlockEntityTypeRegistry {
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, TellMeWhere.MODID);
 
-    public static final RegistryObject<BlockEntityType<TestSignBlockEntity>> TEST_SIGN = BLOCK_ENTITIES.register("test_sign", () -> BlockEntityType.Builder.of(
-            TestSignBlockEntity::new, ModBlockRegistry.TEST_SIGN.get()
+    public static final RegistryObject<BlockEntityType<SignBlockEntity>> TEST_SIGN = BLOCK_ENTITIES.register("sign", () -> BlockEntityType.Builder.of(
+            SignBlockEntity::new,
+            ModBlockRegistry.SIGN_HANG_THIN.get(),
+            ModBlockRegistry.SIGN_HANG_THICK.get(),
+            ModBlockRegistry.SIGN_STAND_THIN.get(),
+            ModBlockRegistry.SIGN_STAND_THICK.get()
     ).build(DSL.remainderType()));
 }

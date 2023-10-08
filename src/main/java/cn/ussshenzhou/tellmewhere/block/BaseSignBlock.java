@@ -1,9 +1,12 @@
 package cn.ussshenzhou.tellmewhere.block;
 
+import cn.ussshenzhou.t88.util.BlockUtil;
 import cn.ussshenzhou.tellmewhere.DirectionUtil;
-import cn.ussshenzhou.tellmewhere.blockentity.TestSignBlockEntity;
+import cn.ussshenzhou.tellmewhere.TellMeWhere;
+import cn.ussshenzhou.tellmewhere.blockentity.SignBlockEntity;
 import cn.ussshenzhou.tellmewhere.gui.SignEditScreen;
 import cn.ussshenzhou.tellmewhere.item.ModItemRegistry;
+import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -18,30 +21,43 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.FACING;
 
 /**
  * @author USS_Shenzhou
  */
-public class TestSign extends BaseEntityBlock {
-    private static final VoxelShape SHAPE_Z = Block.box(0, 6, 7, 16, 16, 9);
-    private static final VoxelShape SHAPE_X = Block.box(7, 6, 0, 9, 16, 16);
+public class BaseSignBlock extends BaseEntityBlock {
+    private final VoxelShape SHAPE_Z = Block.box(0, 6, 7, 16, 16, 9);
+    private final VoxelShape SHAPE_X = Block.box(7, 6, 0, 9, 16, 16);
 
-    protected TestSign() {
+    private final VoxelShape NORTH;
+    private final VoxelShape SOUTH;
+    private final VoxelShape EAST;
+    private final VoxelShape WEST;
+
+    public final int defaultScreenLength16;
+    public final Vector3f screenStart16;
+    public final int screenHeight16;
+    public final int screenThick16;
+    public final int screenMargin16;
+
+    @SuppressWarnings("AlibabaLowerCamelCaseVariableNaming")
+    public BaseSignBlock(Vector3f screenStart16, int defaultScreenLength16, int screenHeight16, int screenThick16, int screenMargin16) {
         super(BlockBehaviour.Properties.of()
                 .noOcclusion()
                 .strength(3, 6)
@@ -49,13 +65,30 @@ public class TestSign extends BaseEntityBlock {
         registerDefaultState(defaultBlockState()
                 .setValue(FACING, Direction.NORTH)
         );
+        this.defaultScreenLength16 = defaultScreenLength16;
+        this.screenStart16 = screenStart16;
+        this.screenHeight16 = screenHeight16;
+        this.screenThick16 = screenThick16;
+        this.screenMargin16 = screenMargin16;
+
+        var helper = BlockUtil.cube16(16 - (screenStart16.x - screenMargin16), 16 - (screenStart16.x + defaultScreenLength16 + screenMargin16),
+                16 - (screenStart16.y - screenMargin16), 16 - (screenStart16.y + screenHeight16 + screenMargin16),
+                screenStart16.z, screenStart16.z + screenThick16
+        );
+        var m = new Matrix4f().rotateAround(Axis.YP.rotationDegrees(90), 8,8,8);
+        this.NORTH = helper.getShape();
+        this.WEST = helper.doo(v -> v.mulProject(m)).getShape();
+        this.SOUTH = helper.doo(v -> v.mulProject(m)).getShape();
+        this.EAST = helper.doo(v -> v.mulProject(m)).getShape();
     }
 
     @Override
     public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return switch (pState.getValue(FACING)) {
-            case NORTH, SOUTH -> SHAPE_Z;
-            case EAST, WEST -> SHAPE_X;
+            case NORTH -> NORTH;
+            case SOUTH -> SOUTH;
+            case EAST -> EAST;
+            case WEST -> WEST;
             default -> Shapes.block();
         };
     }
@@ -63,7 +96,7 @@ public class TestSign extends BaseEntityBlock {
     @Override
     protected void spawnDestroyParticles(Level pLevel, Player pPlayer, BlockPos pPos, BlockState pState) {
         try {
-            super.spawnDestroyParticles(pLevel, pPlayer, pPos, ((TestSignBlockEntity) pLevel.getBlockEntity(pPos)).getDisguiseBlockState());
+            super.spawnDestroyParticles(pLevel, pPlayer, pPos, ((SignBlockEntity) pLevel.getBlockEntity(pPos)).getDisguiseBlockState());
         } catch (Exception ignored) {
         }
     }
@@ -81,7 +114,7 @@ public class TestSign extends BaseEntityBlock {
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pPos, BlockState pState) {
-        return new TestSignBlockEntity(pPos, pState);
+        return new SignBlockEntity(pPos, pState, screenStart16, defaultScreenLength16, screenHeight16, screenThick16, screenMargin16);
     }
 
     /**
@@ -91,7 +124,7 @@ public class TestSign extends BaseEntityBlock {
     public void setPlacedBy(Level level, BlockPos pos, BlockState pState, @Nullable LivingEntity pPlacer, ItemStack pStack) {
         super.setPlacedBy(level, pos, pState, pPlacer, pStack);
         if (!level.isClientSide()) {
-            var thisEntity = (TestSignBlockEntity) level.getBlockEntity(pos);
+            var thisEntity = (SignBlockEntity) level.getBlockEntity(pos);
             if (thisEntity != null) {
                 thisEntity.neighborUpdated();
             }
@@ -104,12 +137,12 @@ public class TestSign extends BaseEntityBlock {
         if (!level.isClientSide()) {
             //notify left
             var left = DirectionUtil.getBlockEntityAtLeft(level, pos, state);
-            if (left instanceof TestSignBlockEntity e) {
+            if (left instanceof SignBlockEntity e) {
                 e.neighborUpdated();
             }
             //notify right
             var right = DirectionUtil.getBlockEntityAtRight(level, pos, state);
-            if (right instanceof TestSignBlockEntity e) {
+            if (right instanceof SignBlockEntity e) {
                 e.neighborUpdated();
             }
         }
@@ -118,14 +151,15 @@ public class TestSign extends BaseEntityBlock {
     @SuppressWarnings("deprecation")
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pPos, Player player, InteractionHand hang, BlockHitResult hit) {
-        TestSignBlockEntity signBlockEntity = (TestSignBlockEntity) level.getBlockEntity(pPos);
+        SignBlockEntity signBlockEntity = (SignBlockEntity) level.getBlockEntity(pPos);
         Item item = player.getItemInHand(hang).getItem();
-        if (item == ModItemRegistry.TEST_SIGN.get()) {
+        var itemName = ForgeRegistries.ITEMS.getKey(item);
+        if (TellMeWhere.MODID.equals(itemName.getNamespace()) && itemName.getPath().contains("sign_")) {
             return InteractionResult.PASS;
         }
         if (level.isClientSide()) {
             if (player.isCreative()) {
-                var entity = (TestSignBlockEntity) player.level().getBlockEntity(pPos);
+                var entity = (SignBlockEntity) player.level().getBlockEntity(pPos);
                 if (entity == null) {
                     return InteractionResult.FAIL;
                 }
@@ -165,7 +199,7 @@ public class TestSign extends BaseEntityBlock {
         return InteractionResult.SUCCESS;
     }
 
-    private void openEditor(TestSignBlockEntity blockEntity) {
+    private void openEditor(SignBlockEntity blockEntity) {
         Minecraft.getInstance().setScreen(new SignEditScreen(blockEntity));
     }
 }

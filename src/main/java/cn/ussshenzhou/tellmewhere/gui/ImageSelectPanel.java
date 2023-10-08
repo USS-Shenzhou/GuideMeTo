@@ -26,15 +26,6 @@ public class ImageSelectPanel extends TScrollContainer {
         });
     }
 
-    public boolean isInChildrenRange(double pMouseX, double pMouseY) {
-        for (TWidget tWidget : this.children) {
-            if (tWidget.isInRange(pMouseX, pMouseY)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     @Override
     public void layout() {
         int gap = 2;

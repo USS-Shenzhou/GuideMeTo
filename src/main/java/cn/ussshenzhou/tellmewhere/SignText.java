@@ -1,21 +1,16 @@
 package cn.ussshenzhou.tellmewhere;
 
-import cn.ussshenzhou.tellmewhere.blockentity.TestSignBlockEntity;
+import cn.ussshenzhou.tellmewhere.blockentity.SignBlockEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -27,7 +22,6 @@ public class SignText {
     public static final String SPEC_PREFIX = "&@";
 
     private Map<String, String> rawTexts = new HashMap<>();
-
     private List<BakedText> bakedTexts = new LinkedList<>();
     private int totalLength;
 
@@ -49,35 +43,38 @@ public class SignText {
         return rawTexts.get(languageCode);
     }
 
-    @OnlyIn(Dist.CLIENT)
-    public String getRawText() {
-        String rawText = getRawText(Minecraft.getInstance().getLanguageManager().getSelected());
-        return rawText == null ? "" : rawText;
-    }
-
     public Map<String, String> getRawTexts() {
         return rawTexts;
     }
 
     public static SignText read(CompoundTag tag) {
-        var map = new FriendlyByteBuf(Unpooled.copiedBuffer(tag.getByteArray(TestSignBlockEntity.RAW_TEXT))).readMap(FriendlyByteBuf::readUtf, FriendlyByteBuf::readUtf);
+        var map = new FriendlyByteBuf(Unpooled.copiedBuffer(tag.getByteArray(SignBlockEntity.RAW_TEXT))).readMap(FriendlyByteBuf::readUtf, FriendlyByteBuf::readUtf);
         return new SignText(map);
     }
 
     public void write(CompoundTag tag) {
         var buf = new FriendlyByteBuf(Unpooled.buffer());
         buf.writeMap(rawTexts, FriendlyByteBuf::writeUtf, FriendlyByteBuf::writeUtf);
-        tag.putByteArray(TestSignBlockEntity.RAW_TEXT, buf.array());
+        tag.putByteArray(SignBlockEntity.RAW_TEXT, buf.array());
     }
 
-    @OnlyIn(Dist.CLIENT)
+    //----------client----------
+
+    public void restrainWidth(int usableWidth16) {
+
+    }
+
+    public String getRawText() {
+        String rawText = getRawText(Minecraft.getInstance().getLanguageManager().getSelected());
+        return rawText == null ? "" : rawText;
+    }
+
     private void bakeTexts() {
         bakedTexts = bakeTexts(getRawText());
         totalLength = 0;
         bakedTexts.forEach(bakedText -> totalLength += bakedText.length);
     }
 
-    @OnlyIn(Dist.CLIENT)
     public static ArrayList<BakedText> bakeTexts(String raw) {
         ArrayList<BakedText> list = new ArrayList<>();
         while (!raw.isEmpty()) {
