@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.inventory.InventoryMenu;
@@ -24,6 +25,10 @@ public class SignText {
     private Map<String, String> rawTexts = new HashMap<>();
     private List<BakedText> bakedTexts = new LinkedList<>();
     private int totalLength;
+    private float usableWidth = Integer.MAX_VALUE;
+    private float usedWidth;
+    private float textHorizontalCompressFactor = 1;
+    private float totalCompressFactor = 1;
 
     public SignText(Map<String, String> rawTexts) {
         this();
@@ -60,8 +65,10 @@ public class SignText {
 
     //----------client----------
 
-    public void restrainWidth(int usableWidth16) {
-
+    public void setUsableWidth(float usableWidth16) {
+        //TODO replace 8 with var Height
+        this.usableWidth = usableWidth16 / (8f / ImageHelper.IMAGE_SIZE);
+        bakeTexts();
     }
 
     public String getRawText() {
@@ -73,6 +80,35 @@ public class SignText {
         bakedTexts = bakeTexts(getRawText());
         totalLength = 0;
         bakedTexts.forEach(bakedText -> totalLength += bakedText.length);
+        checkWidth();
+    }
+
+    private void checkWidth() {
+        //init
+        totalCompressFactor = 1;
+        textHorizontalCompressFactor = 1;
+        //if need Compress
+        if (usableWidth >= totalLength) {
+            usedWidth = totalLength;
+            return;
+        }
+        usedWidth = usableWidth;
+        //try compress texts
+        float textLength = 0;
+        for (BakedText bakedText : bakedTexts) {
+            if (bakedText.type == BakedType.TEXT) {
+                textLength += bakedText.length;
+            }
+        }
+        float textNeedCompress = (usableWidth - (totalLength - textLength)) / textLength;
+        float maxTextCompress = "zh_cn".equals(Minecraft.getInstance().getLanguageManager().getSelected()) ? 0.7f : 0.6f;
+        if (textNeedCompress >= maxTextCompress) {
+            textHorizontalCompressFactor = textNeedCompress;
+            return;
+        }
+        //if not enough, then compress all
+        textHorizontalCompressFactor = maxTextCompress;
+        totalCompressFactor = usableWidth / (totalLength - textLength + textLength * textHorizontalCompressFactor);
     }
 
     public static ArrayList<BakedText> bakeTexts(String raw) {
@@ -107,9 +143,19 @@ public class SignText {
 
     public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight, @Nullable BakedType only) {
         poseStack.pushPose();
+        poseStack.translate((usableWidth - usedWidth) / 2, 0, 0);
+        poseStack.scale(totalCompressFactor, totalCompressFactor, 1);
         for (BakedText b : bakedTexts) {
-            b.render(poseStack, buffer, packedLight, only);
-            poseStack.translate(b.length, 0, 0);
+            if (b.type == BakedType.TEXT) {
+                poseStack.pushPose();
+                poseStack.scale(textHorizontalCompressFactor, 1, 1);
+                b.render(poseStack, buffer, packedLight, only);
+                poseStack.popPose();
+                poseStack.translate(b.length * textHorizontalCompressFactor, 0, 0);
+            } else {
+                b.render(poseStack, buffer, packedLight, only);
+                poseStack.translate(b.length, 0, 0);
+            }
         }
         poseStack.popPose();
     }
@@ -167,16 +213,19 @@ public class SignText {
 
         public void renderImage(PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
             if (type == BakedType.IMAGE) {
-                float scale = ImageHelper.IMAGE_SIZE / 2f;
-                poseStack.translate(scale, 0, 0);
-                var image = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(ImageHelper.get(imageIndex).getForRender());
+                float size = ImageHelper.IMAGE_SIZE / 2f;
+                poseStack.translate(size, 0, 0);
+                var i = ImageHelper.get(imageIndex);
+                if (i == null) {
+                    return;
+                }
+                var image = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(i.getForRender());
                 var matrix = poseStack.last().pose();
                 var consumer = buffer.getBuffer(RenderType.translucent());
-                //float scale = ImageHelper.IMAGE_SIZE / 128f;
-                consumer.vertex(matrix, -scale, -scale, 0).color(255, 255, 255, 255).uv(image.getU0(), image.getV0()).uv2(packedLight).normal(1, 0, 0).endVertex();
-                consumer.vertex(matrix, -scale, scale, 0).color(255, 255, 255, 255).uv(image.getU0(), image.getV1()).uv2(packedLight).normal(1, 0, 0).endVertex();
-                consumer.vertex(matrix, scale, scale, 0).color(255, 255, 255, 255).uv(image.getU1(), image.getV1()).uv2(packedLight).normal(1, 0, 0).endVertex();
-                consumer.vertex(matrix, scale, -scale, 0).color(255, 255, 255, 255).uv(image.getU1(), image.getV0()).uv2(packedLight).normal(1, 0, 0).endVertex();
+                consumer.vertex(matrix, -size, -size, 0).color(255, 255, 255, 255).uv(image.getU0(), image.getV0()).uv2(packedLight).normal(1, 0, 0).endVertex();
+                consumer.vertex(matrix, -size, size, 0).color(255, 255, 255, 255).uv(image.getU0(), image.getV1()).uv2(packedLight).normal(1, 0, 0).endVertex();
+                consumer.vertex(matrix, size, size, 0).color(255, 255, 255, 255).uv(image.getU1(), image.getV1()).uv2(packedLight).normal(1, 0, 0).endVertex();
+                consumer.vertex(matrix, size, -size, 0).color(255, 255, 255, 255).uv(image.getU1(), image.getV0()).uv2(packedLight).normal(1, 0, 0).endVertex();
             }
         }
 

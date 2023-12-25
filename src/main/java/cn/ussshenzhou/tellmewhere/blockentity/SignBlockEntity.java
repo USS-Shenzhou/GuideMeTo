@@ -6,8 +6,10 @@ import cn.ussshenzhou.t88.render.RawQuad;
 import cn.ussshenzhou.t88.util.BlockUtil;
 import cn.ussshenzhou.t88.util.RenderUtil;
 import cn.ussshenzhou.tellmewhere.DirectionUtil;
+import cn.ussshenzhou.tellmewhere.ImageHelper;
 import cn.ussshenzhou.tellmewhere.ModRenderTypes;
 import cn.ussshenzhou.tellmewhere.SignText;
+import cn.ussshenzhou.tellmewhere.block.BaseSignBlock;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
@@ -34,7 +36,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
@@ -62,18 +63,18 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
     private boolean slave = false;
     public int screenLength16;
 
-    public final int defaultScreenLength16;
-    public final Vector3f screenStart16;
-    public final int screenHeight16;
-    public final int screenThick16;
-    public final int screenMargin16;
+    public int defaultScreenLength16;
+    public Vector3f screenStart16;
+    public int screenHeight16;
+    public int screenThick16;
+    public int screenMargin16;
     //public final int textMargin = 0;
 
     @OnlyIn(Dist.CLIENT)
     private BakedModel disguiseModel;
 
     public SignBlockEntity(BlockPos pPos, BlockState pBlockState) {
-        this(pPos, pBlockState, new Vector3f(0, 0, 0), 16, 16, 16, 0);
+        this(pPos, pBlockState, new Vector3f(0, 0, 0), Integer.MAX_VALUE, 16, 16, 0);
     }
 
     public SignBlockEntity(BlockPos pPos, BlockState pBlockState, Vector3f screenStart16, int defaultScreenLength16, int screenHeight16, int screenThick16, int screenMargin16) {
@@ -165,10 +166,13 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
 
     public void setSignText(SignText signText) {
         this.signText = signText;
-        if (level != null && !level.isClientSide) {
-            needBroadcastToClients();
+        if (level != null) {
+            if (!level.isClientSide) {
+                needBroadcastToClients();
+            } else {
+                this.signText.setUsableWidth(this.screenLength16);
+            }
         }
-        this.signText.restrainWidth(this.screenLength16);
     }
 
     private void needBroadcastToClients() {
@@ -210,6 +214,15 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
 
     @Override
     public void load(CompoundTag tag) {
+        if (this.defaultScreenLength16 == Integer.MAX_VALUE) {
+            //load from disk
+            BaseSignBlock block = (BaseSignBlock) this.getBlockState().getBlock();
+            this.defaultScreenLength16 = block.defaultScreenLength16;
+            this.screenStart16 = new Vector3f(block.screenStart16);
+            this.screenHeight16 = block.screenHeight16;
+            this.screenThick16 = block.screenThick16;
+            this.screenMargin16 = block.screenMargin16;
+        }
         super.load(tag);
         light = tag.getShort(LIGHT);
         HolderGetter<Block> holdergetter = this.level != null ? this.level.holderLookup(Registries.BLOCK) : BuiltInRegistries.BLOCK.asLookup();
@@ -420,7 +433,7 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
         float x1 = -this.screenLength16 / 16f;
         float y1 = -this.screenHeight16 / 16f;
         var matrix = poseStack.last().pose();
-        poseStack.translate(0, 0, -0.001f);
+        poseStack.translate(0, 0, -0.005f);
         builder.vertex(matrix, 0, 0, 0).color(0, 0, 0, 1).uv2(packedLight).endVertex();
         builder.vertex(matrix, 0, y1, 0).color(0, 0, 0, 1).uv2(packedLight).endVertex();
         builder.vertex(matrix, x1, y1, 0).color(0, 0, 0, 1).uv2(packedLight).endVertex();
@@ -437,9 +450,9 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
 
     public void renderText(PoseStack poseStack, MultiBufferSource buffer, int packedLight, SignText.BakedType only) {
         moveToUpLeft(poseStack);
-        poseStack.translate(0, -this.screenHeight16 / 2f / 16, -0.002f);
+        poseStack.translate(0, -this.screenHeight16 / 2f / 16, -0.007f);
         poseStack.rotateAround(Axis.ZP.rotation((float) Math.PI), 0, 0, 0);
-        poseStack.scale(1 / 12f, 1 / 12f, 0);
+        poseStack.scale(1f / ImageHelper.IMAGE_SIZE, 1f / ImageHelper.IMAGE_SIZE, 0);
         poseStack.scale(this.screenHeight16 / 16f, this.screenHeight16 / 16f, 0);
         this.signText.render(poseStack, buffer, packedLight, only);
     }
