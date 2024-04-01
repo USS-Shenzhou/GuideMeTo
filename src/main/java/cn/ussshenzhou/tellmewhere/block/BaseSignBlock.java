@@ -5,11 +5,12 @@ import cn.ussshenzhou.tellmewhere.DirectionUtil;
 import cn.ussshenzhou.tellmewhere.TellMeWhere;
 import cn.ussshenzhou.tellmewhere.blockentity.SignBlockEntity;
 import cn.ussshenzhou.tellmewhere.gui.SignEditScreen;
-import cn.ussshenzhou.tellmewhere.item.ModItemRegistry;
 import com.mojang.math.Axis;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -22,6 +23,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.BeaconBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -31,7 +33,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -49,6 +50,8 @@ public class BaseSignBlock extends BaseEntityBlock {
     private final VoxelShape SOUTH;
     private final VoxelShape EAST;
     private final VoxelShape WEST;
+
+    public static final MapCodec<BaseSignBlock> CODEC = simpleCodec((Properties p) -> new BaseSignBlock(new Vector3f(), 0, 0, 0, 0));
 
     public final int defaultScreenLength16;
     public final Vector3f screenStart16;
@@ -75,7 +78,7 @@ public class BaseSignBlock extends BaseEntityBlock {
                 16 - (screenStart16.y - screenMargin16), 16 - (screenStart16.y + screenHeight16 + screenMargin16),
                 screenStart16.z, screenStart16.z + screenThick16
         );
-        var m = new Matrix4f().rotateAround(Axis.YP.rotationDegrees(90), 8,8,8);
+        var m = new Matrix4f().rotateAround(Axis.YP.rotationDegrees(90), 8, 8, 8);
         this.NORTH = helper.getShape();
         this.WEST = helper.doo(v -> v.mulProject(m)).getShape();
         this.SOUTH = helper.doo(v -> v.mulProject(m)).getShape();
@@ -153,7 +156,7 @@ public class BaseSignBlock extends BaseEntityBlock {
     public InteractionResult use(BlockState state, Level level, BlockPos pPos, Player player, InteractionHand hang, BlockHitResult hit) {
         SignBlockEntity signBlockEntity = (SignBlockEntity) level.getBlockEntity(pPos);
         Item item = player.getItemInHand(hang).getItem();
-        var itemName = ForgeRegistries.ITEMS.getKey(item);
+        var itemName = BuiltInRegistries.ITEM.getKey(item);
         if (TellMeWhere.MODID.equals(itemName.getNamespace()) && itemName.getPath().contains("sign_")) {
             return InteractionResult.PASS;
         }
@@ -201,5 +204,10 @@ public class BaseSignBlock extends BaseEntityBlock {
 
     private void openEditor(SignBlockEntity blockEntity) {
         Minecraft.getInstance().setScreen(new SignEditScreen(blockEntity));
+    }
+
+    @Override
+    protected MapCodec<? extends BaseEntityBlock> codec() {
+        return CODEC;
     }
 }

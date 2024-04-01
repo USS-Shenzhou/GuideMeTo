@@ -7,6 +7,10 @@ import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author USS_Shenzhou
@@ -24,5 +28,11 @@ public class TestSignBlockEntityRenderer implements BlockEntityRenderer<SignBloc
             sign.renderText(poseStack, buffer, packedLight, SignText.BakedType.TEXT);
             poseStack.popPose();
         }
+    }
+
+    @Override
+    public @NotNull AABB getRenderBoundingBox(SignBlockEntity blockEntity) {
+        var extra = blockEntity.getBlockState().getValue(BlockStateProperties.FACING).getCounterClockWise().getNormal().multiply(blockEntity.screenLength16 / 16);
+        return BlockEntityRenderer.super.getRenderBoundingBox(blockEntity).expandTowards(extra.getX(), extra.getY(), extra.getZ());
     }
 }

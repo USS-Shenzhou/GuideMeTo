@@ -7,11 +7,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.neoforged.fml.loading.FMLEnvironment;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -53,13 +52,13 @@ public class SignText {
     }
 
     public static SignText read(CompoundTag tag) {
-        var map = new FriendlyByteBuf(Unpooled.copiedBuffer(tag.getByteArray(SignBlockEntity.RAW_TEXT))).readMap(FriendlyByteBuf::readUtf, FriendlyByteBuf::readUtf);
+        var map = new FriendlyByteBuf(Unpooled.copiedBuffer(tag.getByteArray(SignBlockEntity.RAW_TEXT))).readMap(FriendlyByteBuf::readUtf, b -> b.readUtf());
         return new SignText(map);
     }
 
     public void write(CompoundTag tag) {
         var buf = new FriendlyByteBuf(Unpooled.buffer());
-        buf.writeMap(rawTexts, FriendlyByteBuf::writeUtf, FriendlyByteBuf::writeUtf);
+        buf.writeMap(rawTexts,  FriendlyByteBuf::writeUtf, (b, s) -> b.writeUtf(s));
         tag.putByteArray(SignBlockEntity.RAW_TEXT, buf.array());
     }
 

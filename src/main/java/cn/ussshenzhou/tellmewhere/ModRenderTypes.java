@@ -1,13 +1,10 @@
 package cn.ussshenzhou.tellmewhere;
 
-import cn.ussshenzhou.t88.render.ChunkBufferRenderType;
+import cn.ussshenzhou.t88.render.SectionBufferRenderType;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.common.Mod;
 
 /**
  * @author USS_Shenzhou
@@ -19,7 +16,7 @@ public class ModRenderTypes extends RenderStateShard {
         super(pName, pSetupState, pClearState);
     }
 
-    @ChunkBufferRenderType
+    @SectionBufferRenderType
     public static final RenderType FILL_COLOR = RenderType.create("fill_color",
             DefaultVertexFormat.POSITION_COLOR_LIGHTMAP,
             VertexFormat.Mode.QUADS,

@@ -1,8 +1,8 @@
 package cn.ussshenzhou.tellmewhere.blockentity;
 
-import cn.ussshenzhou.t88.render.ChunkCompileContext;
 import cn.ussshenzhou.t88.render.IFixedModelBlockEntity;
 import cn.ussshenzhou.t88.render.RawQuad;
+import cn.ussshenzhou.t88.render.SectionCompileContext;
 import cn.ussshenzhou.t88.util.BlockUtil;
 import cn.ussshenzhou.t88.util.RenderUtil;
 import cn.ussshenzhou.tellmewhere.DirectionUtil;
@@ -14,9 +14,9 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ChunkBufferBuilderPack;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.SectionBufferBuilderPack;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
@@ -34,8 +34,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
@@ -248,12 +248,6 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
         return disguiseBlockState;
     }
 
-    @Override
-    public AABB getRenderBoundingBox() {
-        var extra = this.getBlockState().getValue(FACING).getCounterClockWise().getNormal().multiply(screenLength16 / 16);
-        return super.getRenderBoundingBox().expandTowards(extra.getX(), extra.getY(), extra.getZ());
-    }
-
     @Nullable
     @Override
     public Packet<ClientGamePacketListener> getUpdatePacket() {
@@ -397,7 +391,7 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
     }
 
     @Override
-    public ChunkCompileContext handleCompileContext(ChunkCompileContext chunkCompileContext) {
+    public SectionCompileContext handleCompileContext(SectionCompileContext chunkCompileContext) {
         return chunkCompileContext
                 .withRenderType(RenderType.translucent())
                 .withPrepareBakedModelRender(
@@ -411,7 +405,7 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
     }
 
     @Override
-    public void renderAdditional(ChunkCompileContext context, Set<RenderType> begunRenderTypes, ChunkBufferBuilderPack builderPack, PoseStack poseStack, int packedOverlay) {
+    public void renderAdditional(SectionCompileContext context, Set<RenderType> begunRenderTypes, SectionBufferBuilderPack builderPack, PoseStack poseStack, int packedOverlay) {
         if (this.isMaster()) {
             int l = getPackedLight();
             renderBackGround(poseStack, getBuilder(begunRenderTypes, builderPack, ModRenderTypes.FILL_COLOR), l);
