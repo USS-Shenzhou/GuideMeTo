@@ -9,11 +9,13 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
+import java.util.List;
 import java.util.function.Supplier;
 
 
@@ -30,9 +32,8 @@ public class ModItemRegistry {
     public static final Supplier<BlockItem> SIGN_STAND_THIN = ITEMS.register("sign_stand_thin", () -> new BlockItem(ModBlockRegistry.SIGN_STAND_THIN.get(), new Item.Properties()));
     public static final Supplier<BlockItem> SIGN_STAND_THICK = ITEMS.register("sign_stand_thick", () -> new BlockItem(ModBlockRegistry.SIGN_STAND_THICK.get(), new Item.Properties()));
 
-
     public static final Supplier<CreativeModeTab> TAB = CREATIVE_MODE_TABS.register("main", () -> CreativeModeTab.builder()
-            .withTabsImage(new ResourceLocation(TellMeWhere.MODID, "textures/gui/up.png"))
+            .icon(() -> new ItemStack(SIGN_HANG_THIN.get()))
             .title(Component.literal("Tell Me Where"))
             .build());
 

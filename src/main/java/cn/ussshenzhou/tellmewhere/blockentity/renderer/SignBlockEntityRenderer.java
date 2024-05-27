@@ -9,15 +9,14 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 /**
  * @author USS_Shenzhou
  */
-public class TestSignBlockEntityRenderer implements BlockEntityRenderer<SignBlockEntity> {
+public class SignBlockEntityRenderer implements BlockEntityRenderer<SignBlockEntity> {
 
-    public TestSignBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
+    public SignBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
     }
 
     @Override

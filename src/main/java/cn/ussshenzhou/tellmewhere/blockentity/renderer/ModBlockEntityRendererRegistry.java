@@ -15,6 +15,6 @@ public class ModBlockEntityRendererRegistry {
 
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerBlockEntityRenderer(ModBlockEntityTypeRegistry.TEST_SIGN.get(), TestSignBlockEntityRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntityTypeRegistry.TEST_SIGN.get(), SignBlockEntityRenderer::new);
     }
 }

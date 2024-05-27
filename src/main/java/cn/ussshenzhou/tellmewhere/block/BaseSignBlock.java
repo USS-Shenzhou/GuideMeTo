@@ -43,8 +43,6 @@ import static net.minecraft.world.level.block.state.properties.BlockStatePropert
  * @author USS_Shenzhou
  */
 public class BaseSignBlock extends BaseEntityBlock {
-    private final VoxelShape SHAPE_Z = Block.box(0, 6, 7, 16, 16, 9);
-    private final VoxelShape SHAPE_X = Block.box(7, 6, 0, 9, 16, 16);
 
     private final VoxelShape NORTH;
     private final VoxelShape SOUTH;

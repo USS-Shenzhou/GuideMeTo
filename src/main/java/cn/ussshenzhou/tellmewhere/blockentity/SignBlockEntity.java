@@ -170,7 +170,7 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
             if (!level.isClientSide) {
                 needBroadcastToClients();
             } else {
-                this.signText.setUsableWidth(this.screenLength16);
+                this.signText.setUsableWidth(this.screenLength16, this.screenHeight16);
             }
         }
     }
@@ -256,103 +256,68 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
 
     //----------client----------
 
-    protected void handleFrontAndBack(RawQuad rawQuad) {
-        rawQuad.shrink16(screenStart16.y - screenMargin16, 16 - screenStart16.y - screenHeight16 - screenMargin16, 0, 0);
+    private float blockStartX16() {
+        return screenStart16.x - screenMargin16;
+    }
+
+    private float blockStartY16() {
+        return screenStart16.y - screenMargin16;
+    }
+
+    private float blockStartZ16() {
+        return screenStart16.z;
+    }
+
+    private float blockEndX16() {
+        return screenStart16.x + defaultScreenLength16 + screenMargin16;
+    }
+
+    private float blockEndY16() {
+        return screenStart16.y + screenHeight16 + screenMargin16;
+    }
+
+    private float blockEndZ16() {
+        return screenStart16.z + screenThick16;
     }
 
     protected void handleFront(RawQuad front) {
-        handleFrontAndBack(front);
-        front.shrink16(0, 0, screenStart16.x - screenMargin16, 16 - screenStart16.x - defaultScreenLength16 - screenMargin16);
-        int i = noReverse() ? 1 : -1;
-        if (front.getDirection().getAxis() == Direction.Axis.X) {
-            front.move16(screenStart16.z * i, 0, 0);
-        } else {
-            front.move16(0, 0, screenStart16.z * i);
-        }
+        front.shrink16(blockStartY16(), 16 - blockEndY16(), blockStartX16(), 16 - blockEndX16());
+        front.moveRel16(0, 0, blockStartZ16());
     }
 
     protected void handleBack(RawQuad back) {
-        handleFrontAndBack(back);
-        back.shrink16(0, 0, 16 - screenStart16.x - defaultScreenLength16 - screenMargin16, screenStart16.x - screenMargin16);
-        int i = noReverse() ? 1 : -1;
-        if (back.getDirection().getAxis() == Direction.Axis.X) {
-            back.move16(-(16 - screenThick16 - screenStart16.z) * i, 0, 0);
-        } else {
-            back.move16(0, 0, -(16 - screenThick16 - screenStart16.z) * i);
-        }
+        back.shrink16(blockStartY16(), 16 - blockEndY16(), 16 - blockEndX16(), blockStartX16());
+        back.moveRel16(0, 0, 16 - blockEndZ16());
     }
 
     protected void handleLeft(RawQuad left) {
-        left.shrink16(0, 16 - screenStart16.y - screenHeight16 - screenMargin16, 16 - screenThick16 - screenStart16.z, screenStart16.z);
-        int i = noReverse() ? 1 : -1;
-        if (left.getDirection().getAxis() == Direction.Axis.X) {
-            left.move16(-(screenStart16.x - screenMargin16) * i, 0, 0);
-        } else {
-            left.move16(0, 0, (screenStart16.x - screenMargin16) * i);
-        }
+        left.shrink16(blockStartY16(), 16 - blockEndY16(), 16 - blockEndZ16(), blockStartZ16());
+        left.moveRel16(0, 0, blockStartX16());
     }
 
     protected void handleRight(RawQuad right) {
-        right.shrink16(0, 16 - screenStart16.y - screenHeight16 - screenMargin16, screenStart16.z, 16 - screenThick16 - screenStart16.z);
-        int i = noReverse() ? 1 : -1;
-        if (right.getDirection().getAxis() == Direction.Axis.X) {
-            right.move16((16 - screenStart16.x - defaultScreenLength16 - screenMargin16) * i, 0, 0);
-        } else {
-            right.move16(0, 0, -(16 - screenStart16.x - defaultScreenLength16 - screenMargin16) * i);
-        }
-    }
-
-    protected void handleUpAndDown(RawQuad rawQuad) {
-        float i1 = screenStart16.z;
-        float i2 = 16 - screenThick16 - screenStart16.z;
-        switch (getFacing()) {
-            case NORTH -> {
-                handleUpAndDownInternalZ(i1, i2, rawQuad);
-                rawQuad.shrink16(0, 0, 16 - screenStart16.y - defaultScreenLength16 - screenMargin16, screenStart16.x - screenMargin16);
-            }
-            case SOUTH -> {
-                handleUpAndDownInternalZ(i2, i1, rawQuad);
-                rawQuad.shrink16(0, 0, screenStart16.x - screenMargin16, 16 - screenStart16.y - defaultScreenLength16 - screenMargin16);
-            }
-            case WEST -> {
-                rawQuad.shrink16(0, 0, i1, i2);
-                handleUpAndDownInternalX(screenStart16.x - screenMargin16, 16 - screenStart16.y - defaultScreenLength16 - screenMargin16, rawQuad);
-            }
-            case EAST -> {
-                rawQuad.shrink16(0, 0, i2, i1);
-                handleUpAndDownInternalX(16 - screenStart16.y - defaultScreenLength16 - screenMargin16, screenStart16.x - screenMargin16, rawQuad);
-            }
-        }
-    }
-
-    protected void handleUpAndDownInternalX(float f1, float f2, RawQuad rawQuad) {
-        if (rawQuad.getDirection() == Direction.UP) {
-            rawQuad.shrink16(f1, f2, 0, 0);
-        } else {
-            rawQuad.shrink16(f2, f1, 0, 0);
-        }
-    }
-
-    protected void handleUpAndDownInternalZ(float f1, float f2, RawQuad rawQuad) {
-        if (rawQuad.getDirection() == Direction.UP) {
-            rawQuad.shrink16(f1, f2, 0, 0);
-        } else {
-            rawQuad.shrink16(f2, f1, 0, 0);
-        }
+        right.shrink16(blockStartY16(), 16 - blockEndY16(), blockStartZ16(), 16 - blockEndZ16());
+        right.moveRel16(0, 0, 16 - blockEndX16());
     }
 
     protected void handleUp(RawQuad up) {
-        handleUpAndDown(up);
-        up.move16(0, -(screenStart16.y - screenMargin16), 0);
+        switch (getFacing()) {
+            case NORTH -> up.shrink16(16 - blockEndZ16(), blockStartZ16(), blockStartX16(), 16 - blockEndX16());
+            case SOUTH -> up.shrink16(blockStartZ16(), 16 - blockEndZ16(), 16 - blockEndX16(), blockStartX16());
+            case EAST -> up.shrink16(16 - blockEndX16(), blockStartX16(), 16 - blockEndZ16(), blockStartZ16());
+            case WEST -> up.shrink16(blockStartX16(), 16 - blockEndX16(), blockStartZ16(), 16 - blockEndZ16());
+        }
+        up.moveRel16(0, 0, blockStartY16());
     }
 
     protected void handleDown(RawQuad down) {
-        handleUpAndDown(down);
-        down.move16(0, 16 - screenStart16.y - screenHeight16 - screenMargin16, 0);
-    }
-
-    protected boolean noReverse() {
-        return getFacing() == Direction.NORTH || getFacing() == Direction.WEST;
+        switch (getFacing()) {
+            case NORTH -> down.shrink16(blockStartZ16(), 16 - blockEndZ16(), blockStartX16(), 16 - blockEndX16());
+            case SOUTH -> down.shrink16(16 - blockEndZ16(), blockStartZ16(), 16 - blockEndX16(), blockStartX16());
+            case EAST -> down.shrink16(blockStartX16(), 16 - blockEndX16(), 16 - blockEndZ16(), blockStartZ16());
+            case WEST -> down.shrink16(16 - blockEndX16(), blockStartX16(), blockStartZ16(), 16 - blockEndZ16());
+        }
+        down.moveRel16(0, 0, 16 - blockEndY16());
     }
 
     protected void handleQuads(BakedModel blockModel, Direction d, Consumer<RawQuad> directionalHandler, List<BakedQuad> quadList) {

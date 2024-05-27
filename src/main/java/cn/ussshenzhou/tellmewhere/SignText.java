@@ -58,15 +58,14 @@ public class SignText {
 
     public void write(CompoundTag tag) {
         var buf = new FriendlyByteBuf(Unpooled.buffer());
-        buf.writeMap(rawTexts,  FriendlyByteBuf::writeUtf, (b, s) -> b.writeUtf(s));
+        buf.writeMap(rawTexts, FriendlyByteBuf::writeUtf, (b, s) -> b.writeUtf(s));
         tag.putByteArray(SignBlockEntity.RAW_TEXT, buf.array());
     }
 
     //----------client----------
 
-    public void setUsableWidth(float usableWidth16) {
-        //TODO replace 8 with var Height
-        this.usableWidth = usableWidth16 / (8f / ImageHelper.IMAGE_SIZE);
+    public void setUsableWidth(float usableWidth16, float screenHeight) {
+        this.usableWidth = usableWidth16 / (screenHeight / ImageHelper.IMAGE_SIZE);
         bakeTexts();
     }
 
