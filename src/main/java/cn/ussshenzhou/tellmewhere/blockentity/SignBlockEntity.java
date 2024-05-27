@@ -115,7 +115,9 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
         Direction facing = t.getBlockState().getValue(FACING);
         while (true) {
             BlockEntity rightEntity = DirectionUtil.getBlockEntityAtLeft(level, t.getBlockPos(), facing);
-            if (rightEntity instanceof SignBlockEntity l && DirectionUtil.isParallel(l.getBlockState().getValue(FACING), facing)) {
+            if (rightEntity instanceof SignBlockEntity l
+                    && l.getBlockState().getBlock() == this.getBlockState().getBlock()
+                    && DirectionUtil.isParallel(l.getBlockState().getValue(FACING), facing)) {
                 t = l;
                 slaves.add(l);
             } else {
@@ -302,8 +304,8 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
 
     protected void handleUp(RawQuad up) {
         switch (getFacing()) {
-            case NORTH -> up.shrink16(16 - blockEndZ16(), blockStartZ16(), blockStartX16(), 16 - blockEndX16());
-            case SOUTH -> up.shrink16(blockStartZ16(), 16 - blockEndZ16(), 16 - blockEndX16(), blockStartX16());
+            case NORTH -> up.shrink16(blockStartZ16(), 16 - blockEndZ16(), blockStartX16(), 16 - blockEndX16());
+            case SOUTH -> up.shrink16(16 - blockEndZ16(), blockStartZ16(), 16 - blockEndX16(), blockStartX16());
             case EAST -> up.shrink16(16 - blockEndX16(), blockStartX16(), 16 - blockEndZ16(), blockStartZ16());
             case WEST -> up.shrink16(blockStartX16(), 16 - blockEndX16(), blockStartZ16(), 16 - blockEndZ16());
         }
@@ -312,8 +314,8 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
 
     protected void handleDown(RawQuad down) {
         switch (getFacing()) {
-            case NORTH -> down.shrink16(blockStartZ16(), 16 - blockEndZ16(), blockStartX16(), 16 - blockEndX16());
-            case SOUTH -> down.shrink16(16 - blockEndZ16(), blockStartZ16(), 16 - blockEndX16(), blockStartX16());
+            case NORTH -> down.shrink16(16 - blockEndZ16(), blockStartZ16(), blockStartX16(), 16 - blockEndX16());
+            case SOUTH -> down.shrink16(blockStartZ16(), 16 - blockEndZ16(), 16 - blockEndX16(), blockStartX16());
             case EAST -> down.shrink16(blockStartX16(), 16 - blockEndX16(), 16 - blockEndZ16(), blockStartZ16());
             case WEST -> down.shrink16(16 - blockEndX16(), blockStartX16(), blockStartZ16(), 16 - blockEndZ16());
         }
