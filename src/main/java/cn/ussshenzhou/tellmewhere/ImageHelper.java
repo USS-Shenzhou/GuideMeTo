@@ -13,11 +13,13 @@ public class ImageHelper {
 
     private static final String CATEGORY_STD = "std";
     private static final String CATEGORY_GOOGLE = "google";
+    //-----TeaCon-----
+    private static final String CATEGORY_TEACON = "teacon";
 
     public static final LinkedHashMap<Integer, ImageInfo> IMAGES = new LinkedHashMap<>();
 
     static {
-        //max index zz = 1295
+        //max index zz = 1296
         registerStd(0, "query");
         registerStd(1, "close");
         registerStd(2, "up");
@@ -113,6 +115,10 @@ public class ImageHelper {
         registerGoogle(324, "smoking_area");
 
         registerGoogle(340, "airwave");
+
+        registerImage(1000, "logo", CATEGORY_TEACON);
+        registerImage(1001, "a", CATEGORY_TEACON);
+        registerImage(1002, "b", CATEGORY_TEACON);
     }
 
     private static void registerStd(int index, String resourceName) {
@@ -163,11 +169,11 @@ public class ImageHelper {
         }
 
         public ResourceLocation getForRender() {
-            return new ResourceLocation(TellMeWhere.MODID, "block/signs/" + category + "/" + name);
+            return ResourceLocation.fromNamespaceAndPath(TellMeWhere.MODID, "block/signs/" + category + "/" + name);
         }
 
         public ResourceLocation getForFile() {
-            return new ResourceLocation(TellMeWhere.MODID, "textures/block/signs/" + category + "/" + name + ".png");
+            return ResourceLocation.fromNamespaceAndPath(TellMeWhere.MODID, "textures/block/signs/" + category + "/" + name + ".png");
         }
     }
 }

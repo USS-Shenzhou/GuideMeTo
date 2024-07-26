@@ -1,0 +1,17 @@
+{
+  "gui.tmw.editor.cancel": "Cancel",
+  "gui.tmw.editor.done": "Done",
+
+  "block.guide_me_to.sign_hang_thin": "Sign §o(hang, thin)",
+  "block.guide_me_to.sign_hang_thick": "Sign §o(hang, thick)",
+  "block.guide_me_to.sign_stand_thin": "Sign §o(stand, thin)",
+  "block.guide_me_to.sign_stand_thick": "Sign §o(stand, thick)",
+  "block.guide_me_to.sign_hang_thin_narrow": "Sign §o(hang thin narrow)",
+  "block.guide_me_to.sign_hang_thick_narrow": "Sign §o(hang thick narrow)",
+  "block.guide_me_to.sign_stick_thin": "Sign §o(stick thin)",
+  "block.guide_me_to.sign_stick_thin_full": "Sign §o(stick thin wide)",
+  "block.guide_me_to.sign_stick_thin_narrow": "Sign §o(stick thin narrow)",
+  "block.guide_me_to.sign_stick_thick": "Sign §o(stick thick)",
+  "block.guide_me_to.sign_stick_thick_full": "Sign §o(stick thick wide)",
+  "block.guide_me_to.sign_stick_thick_narrow": "Sign §o(stick thick narrow)"
+}

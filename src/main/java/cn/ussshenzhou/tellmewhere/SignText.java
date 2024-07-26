@@ -220,10 +220,10 @@ public class SignText {
                 var image = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(i.getForRender());
                 var matrix = poseStack.last().pose();
                 var consumer = buffer.getBuffer(RenderType.translucent());
-                consumer.vertex(matrix, -size, -size, 0).color(255, 255, 255, 255).uv(image.getU0(), image.getV0()).uv2(packedLight).normal(1, 0, 0).endVertex();
-                consumer.vertex(matrix, -size, size, 0).color(255, 255, 255, 255).uv(image.getU0(), image.getV1()).uv2(packedLight).normal(1, 0, 0).endVertex();
-                consumer.vertex(matrix, size, size, 0).color(255, 255, 255, 255).uv(image.getU1(), image.getV1()).uv2(packedLight).normal(1, 0, 0).endVertex();
-                consumer.vertex(matrix, size, -size, 0).color(255, 255, 255, 255).uv(image.getU1(), image.getV0()).uv2(packedLight).normal(1, 0, 0).endVertex();
+                consumer.addVertex(matrix, -size, -size, 0).setColor(255, 255, 255, 255).setUv(image.getU0(), image.getV0()).setLight(packedLight).setNormal(1, 0, 0);
+                consumer.addVertex(matrix, -size, size, 0).setColor(255, 255, 255, 255).setUv(image.getU0(), image.getV1()).setLight(packedLight).setNormal(1, 0, 0);
+                consumer.addVertex(matrix, size, size, 0).setColor(255, 255, 255, 255).setUv(image.getU1(), image.getV1()).setLight(packedLight).setNormal(1, 0, 0);
+                consumer.addVertex(matrix, size, -size, 0).setColor(255, 255, 255, 255).setUv(image.getU1(), image.getV0()).setLight(packedLight).setNormal(1, 0, 0);
             }
         }
 

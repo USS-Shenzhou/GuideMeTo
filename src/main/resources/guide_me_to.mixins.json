@@ -1,7 +1,7 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "cn.uss-shenzhou.tell_me_where.mixin",
+  "package": "cn.ussshenzhou.tellmewhere.mixin",
   "compatibilityLevel": "JAVA_8",
   "refmap": "TellMeWhere.refmap.json",
   "mixins": [

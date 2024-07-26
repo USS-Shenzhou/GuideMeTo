@@ -1,0 +1,17 @@
+{
+  "gui.tmw.editor.cancel": "取消",
+  "gui.tmw.editor.done": "完成",
+
+  "block.guide_me_to.sign_hang_thin": "标志牌 §o挂式 薄",
+  "block.guide_me_to.sign_hang_thick": "标志牌 §o挂式 厚",
+  "block.guide_me_to.sign_stand_thin": "标志牌 §o立式 薄",
+  "block.guide_me_to.sign_stand_thick": "标志牌 §o立式 厚",
+  "block.guide_me_to.sign_hang_thin_narrow": "标志牌 §o挂式 薄 窄",
+  "block.guide_me_to.sign_hang_thick_narrow": "标志牌 §o挂式 厚 窄",
+  "block.guide_me_to.sign_stick_thin": "标志牌 §o贴式 薄",
+  "block.guide_me_to.sign_stick_thin_full": "标志牌 §o贴式 薄 宽",
+  "block.guide_me_to.sign_stick_thin_narrow": "标志牌 §o贴式 薄 窄",
+  "block.guide_me_to.sign_stick_thick": "标志牌 §o贴式 厚",
+  "block.guide_me_to.sign_stick_thick_full": "标志牌 §o贴式 厚 宽",
+  "block.guide_me_to.sign_stick_thick_narrow": "标志牌 §o贴式 厚 窄"
+}

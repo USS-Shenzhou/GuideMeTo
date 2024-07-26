@@ -5,6 +5,8 @@ import cn.ussshenzhou.t88.gui.container.TScrollContainer;
 import cn.ussshenzhou.t88.gui.widegt.TWidget;
 import cn.ussshenzhou.tellmewhere.ImageHelper;
 import cn.ussshenzhou.tellmewhere.SignText;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.network.chat.Component;
 
 import java.util.List;
 
@@ -22,6 +24,7 @@ public class ImageSelectPanel extends TScrollContainer {
                 );
             });
             button.setNormalBorder(0);
+            button.setTooltip(Tooltip.create(Component.literal(imageInfo.name())));
             this.add(button);
         });
     }

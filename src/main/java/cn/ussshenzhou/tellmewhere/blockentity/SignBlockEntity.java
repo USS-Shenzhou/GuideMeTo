@@ -10,9 +10,11 @@ import cn.ussshenzhou.tellmewhere.ImageHelper;
 import cn.ussshenzhou.tellmewhere.ModRenderTypes;
 import cn.ussshenzhou.tellmewhere.SignText;
 import cn.ussshenzhou.tellmewhere.block.BaseSignBlock;
+import cn.ussshenzhou.tellmewhere.util.AlwaysZeroRandomSource;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -22,6 +24,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderGetter;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -39,6 +42,7 @@ import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +54,8 @@ import static net.minecraft.world.level.block.state.properties.BlockStatePropert
 /**
  * @author USS_Shenzhou
  */
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
 public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEntity {
     public static final String RAW_TEXT = "tmw_rawtext";
     public static final String LIGHT = "tmw_light";
@@ -100,7 +106,9 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
         }
         while (true) {
             BlockEntity rightEntity = DirectionUtil.getBlockEntityAtRight(level, t.getBlockPos(), facing);
-            if (rightEntity instanceof SignBlockEntity r && DirectionUtil.isParallel(r.getBlockState().getValue(FACING), facing)) {
+            if (rightEntity instanceof SignBlockEntity r
+                    && r.getBlockState().getBlock() == this.getBlockState().getBlock()
+                    && DirectionUtil.isParallel(r.getBlockState().getValue(FACING), facing)) {
                 t = r;
             } else {
                 break;
@@ -194,28 +202,7 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
-        signText.write(tag);
-        tag.putShort(LIGHT, light);
-        tag.put(DISGUISE, NbtUtils.writeBlockState(disguiseBlockState));
-        tag.putBoolean(SLAVE, slave);
-        tag.putInt(LENGTH, screenLength16);
-    }
-
-    @Override
-    public CompoundTag getUpdateTag() {
-        var tag = super.getUpdateTag();
-        signText.write(tag);
-        tag.putShort(LIGHT, light);
-        tag.put(DISGUISE, NbtUtils.writeBlockState(disguiseBlockState));
-        tag.putBoolean(SLAVE, slave);
-        tag.putInt(LENGTH, screenLength16);
-        return tag;
-    }
-
-    @Override
-    public void load(CompoundTag tag) {
+    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         if (this.defaultScreenLength16 == Integer.MAX_VALUE) {
             //load from disk
             BaseSignBlock block = (BaseSignBlock) this.getBlockState().getBlock();
@@ -225,7 +212,7 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
             this.screenThick16 = block.screenThick16;
             this.screenMargin16 = block.screenMargin16;
         }
-        super.load(tag);
+        super.loadAdditional(tag, registries);
         light = tag.getShort(LIGHT);
         HolderGetter<Block> holdergetter = this.level != null ? this.level.holderLookup(Registries.BLOCK) : BuiltInRegistries.BLOCK.asLookup();
         this.disguiseBlockState = NbtUtils.readBlockState(holdergetter, tag.getCompound(DISGUISE));
@@ -238,6 +225,20 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
         this.setSignText(SignText.read(tag));
     }
 
+    @Override
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
+        writeTag(tag);
+    }
+
+    private void writeTag(CompoundTag tag) {
+        signText.write(tag);
+        tag.putShort(LIGHT, light);
+        tag.put(DISGUISE, NbtUtils.writeBlockState(disguiseBlockState));
+        tag.putBoolean(SLAVE, slave);
+        tag.putInt(LENGTH, screenLength16);
+    }
+
     public void setDisguise(BlockState disguiseState) {
         disguiseBlockState = disguiseState;
         needBroadcastToClients();
@@ -248,6 +249,13 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
 
     public BlockState getDisguiseBlockState() {
         return disguiseBlockState;
+    }
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        var tag = super.getUpdateTag(registries);
+        writeTag(tag);
+        return tag;
     }
 
     @Nullable
@@ -323,7 +331,7 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
     }
 
     protected void handleQuads(BakedModel blockModel, Direction d, Consumer<RawQuad> directionalHandler, List<BakedQuad> quadList) {
-        for (BakedQuad b : blockModel.getQuads(disguiseBlockState, d, level.random)) {
+        for (BakedQuad b : blockModel.getQuads(disguiseBlockState, d, new AlwaysZeroRandomSource())) {
             RawQuad r = new RawQuad(b);
             directionalHandler.accept(r);
             quadList.add(r.bake());
@@ -361,22 +369,18 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
     public SectionCompileContext handleCompileContext(SectionCompileContext chunkCompileContext) {
         return chunkCompileContext
                 .withRenderType(RenderType.translucent())
-                .withPrepareBakedModelRender(
-                        chunkCompileContext.resetToBlock000()
-                        //fixme wrong AO if tessellateBlock, may related to quad's points' normal, and/or poseStack's normal.
-                        //.andThen(chunkCompileContext.rotateByState())
-                )
+                .withPrepareBakedModelRender(chunkCompileContext.resetToBlock000())
                 .withBakedModel(disguiseModel)
                 .withBlockState(disguiseBlockState)
                 .withAdditionalRender();
     }
 
     @Override
-    public void renderAdditional(SectionCompileContext context, Set<RenderType> begunRenderTypes, SectionBufferBuilderPack builderPack, PoseStack poseStack, int packedOverlay) {
+    public void renderAdditionalAsync(SectionCompileContext context, PoseStack poseStack) {
         if (this.isMaster()) {
             int l = getPackedLight();
-            renderBackGround(poseStack, getBuilder(begunRenderTypes, builderPack, ModRenderTypes.FILL_COLOR), l);
-            renderTextOnlyImage(poseStack, getSimpleMultiBufferSource(begunRenderTypes, builderPack, RenderType.translucent()), l);
+            renderBackGround(poseStack, getBuilder(context, ModRenderTypes.FILL_COLOR), l);
+            renderTextOnlyImage(poseStack, getSimpleMultiBufferSource(context, RenderType.translucent()), l);
         }
     }
 
@@ -395,10 +399,10 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
         float y1 = -this.screenHeight16 / 16f;
         var matrix = poseStack.last().pose();
         poseStack.translate(0, 0, -0.005f);
-        builder.vertex(matrix, 0, 0, 0).color(0, 0, 0, 1).uv2(packedLight).endVertex();
-        builder.vertex(matrix, 0, y1, 0).color(0, 0, 0, 1).uv2(packedLight).endVertex();
-        builder.vertex(matrix, x1, y1, 0).color(0, 0, 0, 1).uv2(packedLight).endVertex();
-        builder.vertex(matrix, x1, 0, 0).color(0, 0, 0, 1).uv2(packedLight).endVertex();
+        builder.addVertex(matrix, 0, 0, 0).setColor(0, 0, 0, 1).setLight(packedLight);
+        builder.addVertex(matrix, 0, y1, 0).setColor(0, 0, 0, 1).setLight(packedLight);
+        builder.addVertex(matrix, x1, y1, 0).setColor(0, 0, 0, 1).setLight(packedLight);
+        builder.addVertex(matrix, x1, 0, 0).setColor(0, 0, 0, 1).setLight(packedLight);
         poseStack.popPose();
     }
 

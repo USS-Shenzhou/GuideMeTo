@@ -7,17 +7,20 @@ import cn.ussshenzhou.tellmewhere.blockentity.SignBlockEntity;
 import cn.ussshenzhou.tellmewhere.gui.SignEditScreen;
 import com.mojang.math.Axis;
 import com.mojang.serialization.MapCodec;
+import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -37,11 +40,15 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.FACING;
 
 /**
  * @author USS_Shenzhou
  */
+@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
 public class BaseSignBlock extends BaseEntityBlock {
 
     private final VoxelShape NORTH;
@@ -149,37 +156,36 @@ public class BaseSignBlock extends BaseEntityBlock {
         }
     }
 
-    @SuppressWarnings("deprecation")
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pPos, Player player, InteractionHand hang, BlockHitResult hit) {
-        SignBlockEntity signBlockEntity = (SignBlockEntity) level.getBlockEntity(pPos);
-        Item item = player.getItemInHand(hang).getItem();
+    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        SignBlockEntity signBlockEntity = (SignBlockEntity) level.getBlockEntity(pos);
+        Item item = player.getItemInHand(hand).getItem();
         var itemName = BuiltInRegistries.ITEM.getKey(item);
         if (TellMeWhere.MODID.equals(itemName.getNamespace()) && itemName.getPath().contains("sign_")) {
-            return InteractionResult.PASS;
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
         if (level.isClientSide()) {
             if (player.isCreative()) {
-                var entity = (SignBlockEntity) player.level().getBlockEntity(pPos);
-                if (entity == null) {
-                    return InteractionResult.FAIL;
+                var entity = (SignBlockEntity) player.level().getBlockEntity(pos);
+                if (entity == null ||Items.WOODEN_AXE.equals(player.getItemInHand(InteractionHand.MAIN_HAND).getItem())) {
+                    return ItemInteractionResult.FAIL;
                 }
-                if (DirectionUtil.isParallel(hit.getDirection(), state.getValue(FACING))) {
+                if (DirectionUtil.isParallel(hitResult.getDirection(), state.getValue(FACING))) {
                     var rightMaster = entity.findMasterAt(false);
-                    if (rightMaster.getBlockState().getValue(FACING) == hit.getDirection()) {
+                    if (rightMaster.getBlockState().getValue(FACING) == hitResult.getDirection()) {
                         openEditor(rightMaster);
-                        return InteractionResult.SUCCESS;
+                        return ItemInteractionResult.SUCCESS;
                     }
                     var leftMaster = entity.findMasterAt(true);
-                    if (leftMaster.getBlockState().getValue(FACING) == hit.getDirection()) {
+                    if (leftMaster.getBlockState().getValue(FACING) == hitResult.getDirection()) {
                         openEditor(leftMaster);
                     }
                 }
-                return InteractionResult.SUCCESS;
+                return ItemInteractionResult.SUCCESS;
             }
         } else {
             //hit other sides
-            if (hit.getDirection() != state.getValue(FACING)) {
+            if (hitResult.getDirection() != state.getValue(FACING)) {
                 if (item instanceof BlockItem blockItem) {
                     //itemInHand can place a block
                     BlockState blockState = blockItem.getBlock().defaultBlockState();
@@ -187,14 +193,39 @@ public class BaseSignBlock extends BaseEntityBlock {
                     if (blockState.getOptionalValue(FACING).isPresent()) {
                         blockState.setValue(FACING, state.getValue(FACING));
                     }
-                    if (blockState.getShape(level, pPos) == Shapes.block()
+                    if (blockState.getShape(level, pos) == Shapes.block()
                             //block placed by itemInHand is a full block
                             && signBlockEntity.getDisguiseBlockState().getBlock() != blockItem.getBlock()) {
                         //block placed by itemInHand is a new block
                         signBlockEntity.setDisguise(blockState);
-                        return InteractionResult.SUCCESS;
+                        return ItemInteractionResult.SUCCESS;
                     }
                 }
+            }
+        }
+        return ItemInteractionResult.SUCCESS;
+    }
+
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+        if (level.isClientSide()) {
+            if (player.isCreative()) {
+                var entity = (SignBlockEntity) player.level().getBlockEntity(pos);
+                if (entity == null || Items.WOODEN_AXE.equals(player.getItemInHand(InteractionHand.MAIN_HAND).getItem())) {
+                    return InteractionResult.FAIL;
+                }
+                if (DirectionUtil.isParallel(hitResult.getDirection(), state.getValue(FACING))) {
+                    var rightMaster = entity.findMasterAt(false);
+                    if (rightMaster.getBlockState().getValue(FACING) == hitResult.getDirection()) {
+                        openEditor(rightMaster);
+                        return InteractionResult.SUCCESS;
+                    }
+                    var leftMaster = entity.findMasterAt(true);
+                    if (leftMaster.getBlockState().getValue(FACING) == hitResult.getDirection()) {
+                        openEditor(leftMaster);
+                    }
+                }
+                return InteractionResult.SUCCESS;
             }
         }
         return InteractionResult.SUCCESS;

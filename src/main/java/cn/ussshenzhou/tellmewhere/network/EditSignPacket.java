@@ -8,10 +8,9 @@ import cn.ussshenzhou.tellmewhere.TellMeWhere;
 import cn.ussshenzhou.tellmewhere.blockentity.SignBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.Map;
-import java.util.function.Supplier;
 
 /**
  * @author USS_Shenzhou
@@ -39,9 +38,9 @@ public class EditSignPacket {
     }
 
     @ServerHandler
-    public void handler(PlayPayloadContext context) {
-        var level = context.level().orElseThrow();
-        if (context.player().orElseThrow().isCreative() && level.isLoaded(pos) && level.getBlockEntity(pos) instanceof SignBlockEntity signBlockEntity) {
+    public void handler(IPayloadContext context) {
+        var level = context.player().level();
+        if (context.player().isCreative() && level.isLoaded(pos) && level.getBlockEntity(pos) instanceof SignBlockEntity signBlockEntity) {
             signBlockEntity.setRawTexts(languageAndText);
         }
     }

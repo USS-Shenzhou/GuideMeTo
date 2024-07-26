@@ -13,7 +13,7 @@ import net.neoforged.fml.common.Mod;
 @Mod(TellMeWhere.MODID)
 public class TellMeWhere {
 
-    public static final String MODID = "tell_me_where";
+    public static final String MODID = "guide_me_to";
 
     public TellMeWhere(IEventBus modEventBus) {
         ModBlockRegistry.BLOCKS.register(modEventBus);

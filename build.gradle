@@ -3,7 +3,16 @@ plugins {
     id 'eclipse'
     id 'idea'
     id 'maven-publish'
-    id 'net.neoforged.gradle.userdev' version '7.0.97'
+    id 'net.neoforged.gradle.userdev' version '7.0.155'
+}
+
+tasks.named('wrapper', Wrapper).configure {
+    // Define wrapper values here so as to not have to always do so when updating gradlew.properties.
+    // Switching this to Wrapper.DistributionType.ALL will download the full gradle sources that comes with
+    // documentation attached on cursor hover of gradle classes and methods. However, this comes with increased
+    // file size for Gradle. If you do switch this to ALL, run the Gradle wrapper task twice afterwards.
+    // (Verify by checking gradle/wrapper/gradle-wrapper.properties to see if distributionUrl now points to `-all`)
+    distributionType = Wrapper.DistributionType.BIN
 }
 
 version = mod_version
@@ -25,7 +34,7 @@ base {
 }
 
 // Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 minecraft.accessTransformers.file rootProject.file('src/main/resources/META-INF/accesstransformer.cfg')
 //minecraft.accessTransformers.entry public net.minecraft.client.Minecraft textureManager # textureManager
@@ -97,10 +106,10 @@ dependencies {
 
     //implementation fg.deobf("curse.maven:shimmer-627824:4676467")
     if (System.getProperty("idea.active")) {
-        implementation("cn.ussshenzhou:t88:0.8.0")
-        annotationProcessor("cn.ussshenzhou:t88:0.8.0")
+        implementation("cn.ussshenzhou:t88:0.9.+")
+        annotationProcessor("cn.ussshenzhou:t88:0.9.+")
     } else {
-        def t88FileId = '5047389'
+        def t88FileId = '5566480'
         implementation 'curse.maven:t88-663112:' + t88FileId
         annotationProcessor 'curse.maven:t88-663112:' + t88FileId
     }
@@ -141,7 +150,7 @@ tasks.withType(ProcessResources).configureEach {
     ]
     inputs.properties replaceProperties
 
-    filesMatching(['META-INF/mods.toml']) {
+    filesMatching(['META-INF/neoforge.mods.toml']) {
         expand replaceProperties + [project: project]
     }
 }
@@ -173,4 +182,36 @@ tasks.register("githubActionOutput") {
     it.doLast {
         println "::set-output name=artifact_name::${archivesBaseName}-${version}"
     }
+}
+
+// IDEA no longer automatically downloads sources/javadoc jars for dependencies, so we need to explicitly enable the behavior.
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
+    }
+}
+
+tasks.register("runWithRenderDoc", Exec) {
+    def javaExecTask = tasks.withType(JavaExec).named("runClient").get()
+    def javaHome = javaExecTask.javaLauncher.get().metadata.installationPath.asFile.absolutePath
+
+    commandLine = [
+            "C:\\Program Files\\RenderDoc\\renderdoccmd.exe",
+            "capture",
+            "--opt-hook-children",
+            "--wait-for-exit",
+            "--working-dir",
+            ".",
+            "$javaHome\\bin\\java.exe",
+            "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005",
+            "-Xmx64m",
+            "-Xms64m",
+            "-Dorg.gradle.appname=gradlew",
+            "-Dorg.gradle.java.home=$javaHome",
+            "-classpath",
+            "gradle/wrapper/gradle-wrapper.jar",
+            "org.gradle.wrapper.GradleWrapperMain",
+            "runClient"
+    ]
 }
