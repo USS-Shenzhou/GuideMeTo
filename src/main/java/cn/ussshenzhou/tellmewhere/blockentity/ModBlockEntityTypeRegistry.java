@@ -1,8 +1,7 @@
 package cn.ussshenzhou.tellmewhere.blockentity;
 
 import cn.ussshenzhou.tellmewhere.TellMeWhere;
-import cn.ussshenzhou.tellmewhere.block.ModBlockRegistry;
-import cn.ussshenzhou.tellmewhere.util.SignBlockAndItemRegistryHelper;
+import cn.ussshenzhou.tellmewhere.item.SignBlockAndItemRegistryHelper;
 import com.mojang.datafixers.DSL;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;

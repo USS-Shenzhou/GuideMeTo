@@ -1,4 +1,4 @@
-package cn.ussshenzhou.tellmewhere.util;
+package cn.ussshenzhou.tellmewhere.item;
 
 import cn.ussshenzhou.tellmewhere.block.BaseSignBlock;
 import net.minecraft.world.item.BlockItem;
@@ -29,15 +29,17 @@ public class SignBlockAndItemRegistryHelper {
     static {
         addContext("sign_hang_thin", 1, 1, 7, 14, 8, 2, 1);
         addContext("sign_hang_thick", 1, 1, 6, 14, 8, 4, 1);
-        addContext("sign_stand_thin", 1, 7, 7, 14, 8, 2, 1);
-        addContext("sign_stand_thick", 1, 7, 6, 14, 8, 4, 1);
         addContext("sign_hang_thin_narrow", 1, 1, 7, 14, 4, 2, 1);
         addContext("sign_hang_thick_narrow", 1, 1, 6, 14, 4, 4, 1);
+        addContext("sign_stand_thin", 1, 7, 7, 14, 8, 2, 1);
+        addContext("sign_stand_thick", 1, 7, 6, 14, 8, 4, 1);
+        addContext("sign_stand_thin_narrow", 1, 11, 7, 14, 4, 2, 1);
+        addContext("sign_stand_thick_narrow", 1, 11, 6, 14, 4, 4, 1);
         addContext("sign_stick_thin", 1, 4, 14, 14, 8, 2, 1);
-        addContext("sign_stick_thin_full", 1, 1, 14, 14, 14, 2, 1);
-        addContext("sign_stick_thin_narrow", 1, 6, 14, 14, 4, 2, 1);
         addContext("sign_stick_thick", 1, 4, 12, 14, 8, 4, 1);
+        addContext("sign_stick_thin_full", 1, 1, 14, 14, 14, 2, 1);
         addContext("sign_stick_thick_full", 1, 1, 12, 14, 14, 4, 1);
+        addContext("sign_stick_thin_narrow", 1, 6, 14, 14, 4, 2, 1);
         addContext("sign_stick_thick_narrow", 1, 6, 12, 14, 4, 4, 1);
     }
 
