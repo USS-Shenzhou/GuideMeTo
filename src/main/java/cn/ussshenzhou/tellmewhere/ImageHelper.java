@@ -61,7 +61,11 @@ public class ImageHelper {
         registerGoogle(222, "cross_passing_left");
         registerGoogle(223, "cross_passing_right");
         registerGoogle(224, "dual_passing");
-
+        registerGoogle(225, "dual_passing2");
+        registerGoogle(226, "roundabout_left");
+        registerGoogle(227, "roundabout_right");
+        registerGoogle(228, "double_arrow_left");
+        registerGoogle(229, "double_arrow_right");
         registerGoogle(230, "start");
         registerGoogle(231, "end");
         registerGoogle(232, "close");
@@ -72,6 +76,7 @@ public class ImageHelper {
         registerGoogle(237, "exit1");
         registerGoogle(238, "entrance2");
         registerGoogle(239, "exit2");
+        registerGoogle(240, "rendezvous");
 
         registerGoogle(250, "warning");
         registerGoogle(251, "attention");
@@ -107,6 +112,8 @@ public class ImageHelper {
         registerGoogle(292, "translate");
         registerGoogle(293, "timer");
         registerGoogle(294, "music");
+        registerGoogle(295, "comment1");
+        registerGoogle(296, "comment2");
 
         registerGoogle(320, "no_stroller");
         registerGoogle(321, "do_not_touch");
