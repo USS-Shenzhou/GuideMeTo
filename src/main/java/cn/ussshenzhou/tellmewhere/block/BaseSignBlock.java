@@ -36,6 +36,8 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -231,6 +233,7 @@ public class BaseSignBlock extends BaseEntityBlock {
         return InteractionResult.SUCCESS;
     }
 
+    @OnlyIn(Dist.CLIENT)
     private void openEditor(SignBlockEntity blockEntity) {
         Minecraft.getInstance().setScreen(new SignEditScreen(blockEntity));
     }

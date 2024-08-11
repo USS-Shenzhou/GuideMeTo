@@ -2,6 +2,7 @@ package cn.ussshenzhou.tellmewhere.gui;
 
 import cn.ussshenzhou.t88.gui.advanced.TImageButton;
 import cn.ussshenzhou.t88.gui.container.TScrollContainer;
+import cn.ussshenzhou.t88.gui.container.TVerticalScrollContainer;
 import cn.ussshenzhou.t88.gui.widegt.TWidget;
 import cn.ussshenzhou.tellmewhere.ImageHelper;
 import cn.ussshenzhou.tellmewhere.SignText;
@@ -13,7 +14,7 @@ import java.util.List;
 /**
  * @author USS_Shenzhou
  */
-public class ImageSelectPanel extends TScrollContainer {
+public class ImageSelectPanel extends TVerticalScrollContainer {
 
     public ImageSelectPanel(List<ImageHelper.ImageInfo> images) {
         images.forEach(imageInfo -> {

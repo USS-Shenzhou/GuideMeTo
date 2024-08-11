@@ -18,7 +18,6 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.SectionBufferBuilderPack;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
@@ -36,7 +35,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
@@ -46,7 +44,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Consumer;
 
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.FACING;
@@ -266,50 +263,61 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
 
     //----------client----------
 
+    @OnlyIn(Dist.CLIENT)
     private float blockStartX16() {
         return screenStart16.x - screenMargin16;
     }
 
+    @OnlyIn(Dist.CLIENT)
     private float blockStartY16() {
         return screenStart16.y - screenMargin16;
     }
 
+    @OnlyIn(Dist.CLIENT)
     private float blockStartZ16() {
         return screenStart16.z;
     }
 
+    @OnlyIn(Dist.CLIENT)
     private float blockEndX16() {
         return screenStart16.x + defaultScreenLength16 + screenMargin16;
     }
 
+    @OnlyIn(Dist.CLIENT)
     private float blockEndY16() {
         return screenStart16.y + screenHeight16 + screenMargin16;
     }
 
+    @OnlyIn(Dist.CLIENT)
     private float blockEndZ16() {
         return screenStart16.z + screenThick16;
     }
 
+    @OnlyIn(Dist.CLIENT)
     protected void handleFront(RawQuad front) {
         front.shrink16(blockStartY16(), 16 - blockEndY16(), blockStartX16(), 16 - blockEndX16());
         front.moveRel16(0, 0, blockStartZ16());
     }
 
+    @OnlyIn(Dist.CLIENT)
     protected void handleBack(RawQuad back) {
         back.shrink16(blockStartY16(), 16 - blockEndY16(), 16 - blockEndX16(), blockStartX16());
         back.moveRel16(0, 0, 16 - blockEndZ16());
     }
 
+    @OnlyIn(Dist.CLIENT)
     protected void handleLeft(RawQuad left) {
         left.shrink16(blockStartY16(), 16 - blockEndY16(), 16 - blockEndZ16(), blockStartZ16());
         left.moveRel16(0, 0, blockStartX16());
     }
 
+    @OnlyIn(Dist.CLIENT)
     protected void handleRight(RawQuad right) {
         right.shrink16(blockStartY16(), 16 - blockEndY16(), blockStartZ16(), 16 - blockEndZ16());
         right.moveRel16(0, 0, 16 - blockEndX16());
     }
 
+    @OnlyIn(Dist.CLIENT)
     protected void handleUp(RawQuad up) {
         switch (getFacing()) {
             case NORTH -> up.shrink16(blockStartZ16(), 16 - blockEndZ16(), blockStartX16(), 16 - blockEndX16());
@@ -320,6 +328,7 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
         up.moveRel16(0, 0, blockStartY16());
     }
 
+    @OnlyIn(Dist.CLIENT)
     protected void handleDown(RawQuad down) {
         switch (getFacing()) {
             case NORTH -> down.shrink16(16 - blockEndZ16(), blockStartZ16(), blockStartX16(), 16 - blockEndX16());
@@ -330,6 +339,7 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
         down.moveRel16(0, 0, 16 - blockEndY16());
     }
 
+    @OnlyIn(Dist.CLIENT)
     protected void handleQuads(BakedModel blockModel, Direction d, Consumer<RawQuad> directionalHandler, List<BakedQuad> quadList) {
         for (BakedQuad b : blockModel.getQuads(disguiseBlockState, d, new AlwaysZeroRandomSource())) {
             RawQuad r = new RawQuad(b);
@@ -338,6 +348,7 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
         }
     }
 
+    @OnlyIn(Dist.CLIENT)
     public void calculateDisguiseModel() {
         BakedModel blockModel = Minecraft.getInstance().getBlockRenderer().getBlockModel(disguiseBlockState);
         List<BakedQuad> quadList = new ArrayList<>();
@@ -357,14 +368,17 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
         }
     }
 
+    @OnlyIn(Dist.CLIENT)
     public Direction getFacing() {
         return BlockUtil.justGetFacing(disguiseBlockState, this.getBlockState());
     }
 
+    @OnlyIn(Dist.CLIENT)
     public BakedModel getDisguiseModel() {
         return disguiseModel;
     }
 
+    @OnlyIn(Dist.CLIENT)
     @Override
     public SectionCompileContext handleCompileContext(SectionCompileContext chunkCompileContext) {
         return chunkCompileContext
@@ -375,6 +389,7 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
                 .withAdditionalRender();
     }
 
+    @OnlyIn(Dist.CLIENT)
     @Override
     public void renderAdditionalAsync(SectionCompileContext context, PoseStack poseStack) {
         if (this.isMaster()) {
@@ -384,6 +399,7 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
         }
     }
 
+    @OnlyIn(Dist.CLIENT)
     public void moveToUpLeft(PoseStack poseStack) {
         //start from left-up, just like gui UV
         RenderUtil.rotateAroundBlockCenter(getFacing(), poseStack);
@@ -391,6 +407,7 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
         poseStack.translate(-screenStart16.x / 16, -screenStart16.y / 16, screenStart16.z / 16);
     }
 
+    @OnlyIn(Dist.CLIENT)
     private void renderBackGround(PoseStack poseStack, BufferBuilder builder, int packedLight) {
         poseStack.pushPose();
         resetToBlock000(ModRenderTypes.FILL_COLOR, poseStack);
@@ -406,6 +423,7 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
         poseStack.popPose();
     }
 
+    @OnlyIn(Dist.CLIENT)
     private void renderTextOnlyImage(PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
         poseStack.pushPose();
         resetToBlock000(RenderType.translucent(), poseStack);
@@ -413,6 +431,7 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
         poseStack.popPose();
     }
 
+    @OnlyIn(Dist.CLIENT)
     public void renderText(PoseStack poseStack, MultiBufferSource buffer, int packedLight, SignText.BakedType only) {
         moveToUpLeft(poseStack);
         poseStack.translate(0, -this.screenHeight16 / 2f / 16, -0.007f);
