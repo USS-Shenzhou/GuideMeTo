@@ -109,7 +109,7 @@ dependencies {
         implementation("cn.ussshenzhou:t88:0.+")
         annotationProcessor("cn.ussshenzhou:t88:0.+")
     } else {
-        def t88FileId = '5617549'
+        def t88FileId = '5618199'
         implementation 'curse.maven:t88-663112:' + t88FileId
         annotationProcessor 'curse.maven:t88-663112:' + t88FileId
     }
