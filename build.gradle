@@ -106,11 +106,15 @@ dependencies {
 
     //implementation fg.deobf("curse.maven:shimmer-627824:4676467")
     if (System.getProperty("idea.active")) {
-        implementation("cn.ussshenzhou:t88:0.+")
+        implementation("cn.ussshenzhou:t88:0.+") {
+            exclude group: "curse.maven", module: "irisshaders-455508"
+        }
         annotationProcessor("cn.ussshenzhou:t88:0.+")
     } else {
         def t88FileId = '5618199'
-        implementation 'curse.maven:t88-663112:' + t88FileId
+        implementation 'curse.maven:t88-663112:' + t88FileId{
+            exclude group: "curse.maven", module: "irisshaders-455508"
+        }
         annotationProcessor 'curse.maven:t88-663112:' + t88FileId
     }
 

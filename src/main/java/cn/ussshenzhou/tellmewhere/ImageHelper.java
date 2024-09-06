@@ -77,6 +77,7 @@ public class ImageHelper {
         registerGoogle(238, "entrance2");
         registerGoogle(239, "exit2");
         registerGoogle(240, "rendezvous");
+        registerGoogle(241, "flag");
 
         registerGoogle(250, "warning");
         registerGoogle(251, "attention");
@@ -86,6 +87,7 @@ public class ImageHelper {
         registerGoogle(255, "checkpoint");
         registerGoogle(256, "accessibility");
         registerGoogle(257, "accessible");
+        registerGoogle(258, "productivity");
 
         registerGoogle(260, "subway");
         registerGoogle(261, "train");
@@ -96,6 +98,8 @@ public class ImageHelper {
         registerGoogle(266, "flight");
         registerGoogle(267, "takeoff");
         registerGoogle(268, "land");
+        registerGoogle(269, "gondola_lift");
+        registerGoogle(270, "elevator");
 
         registerGoogle(280, "bathroom");
         registerGoogle(281, "baby_changing_room");
@@ -114,14 +118,55 @@ public class ImageHelper {
         registerGoogle(294, "music");
         registerGoogle(295, "comment1");
         registerGoogle(296, "comment2");
+        registerGoogle(297, "comment3");
+        registerGoogle(298, "controller");
+        registerGoogle(299, "house");
+        registerGoogle(300, "city");
+        registerGoogle(301, "home_work");
+        registerGoogle(302, "forest");
+
+        registerGoogle(304, "assured_workload");
+        registerGoogle(305, "shopping_cart");
+        registerGoogle(306, "precision_manufacturing");
+        registerGoogle(307, "construction");
+        registerGoogle(308, "handyman");
+        registerGoogle(309, "add_a_photo");
+        registerGoogle(310, "trophy");
+        registerGoogle(311, "deceased");
+        registerGoogle(312, "grass");
 
         registerGoogle(320, "no_stroller");
         registerGoogle(321, "do_not_touch");
         registerGoogle(322, "do_not_step");
         registerGoogle(323, "smoke_free");
         registerGoogle(324, "smoking_area");
+        registerGoogle(325, "smoking_area");
+        registerGoogle(326, "luggage");
+        registerGoogle(327, "no_luggage");
+        registerGoogle(328, "wifi_tethering_off");
+        registerGoogle(329, "wifi_tethering_error");
+        registerGoogle(330, "wifi_tethering");
+        registerGoogle(331, "remove_moderator");
+        registerGoogle(332, "shield_locked");
+        registerGoogle(333, "shield_warning");
+        registerGoogle(334, "verified");
+        registerGoogle(335, "add_moderator");
+        registerGoogle(336, "remove_road");
+        registerGoogle(337, "add_road");
+        registerGoogle(338, "edit_road");
+        registerGoogle(339, "flyover");
+        registerGoogle(340, "road");
 
-        registerGoogle(340, "airwave");
+        registerGoogle(342, "sprint");
+        registerGoogle(343, "walk");
+        registerGoogle(344, "run");
+
+        registerGoogle(400, "airwave");
+
+        registerGoogle(450, "badge");
+        registerGoogle(451, "mic");
+        registerGoogle(452, "speed");
+        registerGoogle(453, "badge");
 
         registerImage(1000, "logo", CATEGORY_TEACON);
         registerImage(1001, "a", CATEGORY_TEACON);
@@ -139,6 +184,7 @@ public class ImageHelper {
     private static void registerImage(int index, String resourceName, String category) {
         if (IMAGES.containsKey(index)) {
             LogUtils.getLogger().error("Conflict image index! Index {} of {} with category {} already exists. This should not happen.", index, resourceName, category);
+            throw new RuntimeException();
         }
         IMAGES.put(index, new ImageInfo(index, resourceName, category));
     }
