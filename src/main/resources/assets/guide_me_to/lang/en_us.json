@@ -15,5 +15,8 @@
   "block.guide_me_to.sign_stick_thin_narrow": "Sign §o(stick thin narrow)",
   "block.guide_me_to.sign_stick_thick": "Sign §o(stick thick)",
   "block.guide_me_to.sign_stick_thick_full": "Sign §o(stick thick wide)",
-  "block.guide_me_to.sign_stick_thick_narrow": "Sign §o(stick thick narrow)"
+  "block.guide_me_to.sign_stick_thick_narrow": "Sign §o(stick thick narrow)",
+
+  "block.guide_me_to.simple_pillar_thin": "Simple Pillar §o(thin)",
+  "block.guide_me_to.simple_pillar_thick": "Simple Pillar §o(thick)"
 }

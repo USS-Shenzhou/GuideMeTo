@@ -12,7 +12,6 @@ import cn.ussshenzhou.tellmewhere.ModRenderTypes;
 import cn.ussshenzhou.tellmewhere.SignText;
 import cn.ussshenzhou.tellmewhere.block.BaseSignBlock;
 import cn.ussshenzhou.tellmewhere.util.AlwaysZeroRandomSource;
-import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -33,6 +32,8 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -395,7 +396,8 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
     @Override
     public void renderAdditionalAsync(SectionCompileContext context, PoseStack poseStack) {
         if (this.isMaster()) {
-            int l = getPackedLight();
+            //TODO
+            int l = 240;
             renderBackGround(poseStack, context.getVertexConsumer(T88.SODIUM_EXIST ? RenderType.solid() : ModRenderTypes.FILL_COLOR), l);
             renderTextOnlyImage(poseStack, context.getSimpleMultiBufferSource(RenderType.translucent()), l);
         }
@@ -419,10 +421,11 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
         poseStack.translate(0, 0, -0.005f);
         var matrix = poseStack.last().pose();
         if (T88.SODIUM_EXIST) {
-            builder.addVertex(matrix, 0, 0, 0).setColor(0, 0, 0, 1).setLight(packedLight).setUv(0, 0).setNormal(1, 0, 0);
-            builder.addVertex(matrix, 0, y1, 0).setColor(0, 0, 0, 1).setLight(packedLight).setUv(0, 0).setNormal(1, 0, 0);
-            builder.addVertex(matrix, x1, y1, 0).setColor(0, 0, 0, 1).setLight(packedLight).setUv(0, 0).setNormal(1, 0, 0);
-            builder.addVertex(matrix, x1, 0, 0).setColor(0, 0, 0, 1).setLight(packedLight).setUv(0, 0).setNormal(1, 0, 0);
+            var image = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(ResourceLocation.withDefaultNamespace("missingno"));
+            builder.addVertex(matrix, 0, 0, 0).setColor(0, 0, 0, 1).setLight(packedLight).setUv(image.getU0(), image.getV0()).setNormal(1, 0, 0);
+            builder.addVertex(matrix, 0, y1, 0).setColor(0, 0, 0, 1).setLight(packedLight).setUv(image.getU0(), image.getV1()).setNormal(1, 0, 0);
+            builder.addVertex(matrix, x1, y1, 0).setColor(0, 0, 0, 1).setLight(packedLight).setUv(image.getU1(), image.getV1()).setNormal(1, 0, 0);
+            builder.addVertex(matrix, x1, 0, 0).setColor(0, 0, 0, 1).setLight(packedLight).setUv(image.getU1(), image.getV0()).setNormal(1, 0, 0);
         } else {
             builder.addVertex(matrix, 0, 0, 0).setColor(0, 0, 0, 1).setLight(packedLight);
             builder.addVertex(matrix, 0, y1, 0).setColor(0, 0, 0, 1).setLight(packedLight);
@@ -448,6 +451,7 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
         poseStack.rotateAround(Axis.ZP.rotation((float) Math.PI), 0, 0, 0);
         poseStack.scale(1f / ImageHelper.IMAGE_SIZE, 1f / ImageHelper.IMAGE_SIZE, 0);
         poseStack.scale(this.screenHeight16 / 16f, this.screenHeight16 / 16f, 0);
-        this.signText.render(poseStack, buffer, packedLight, only);
+        //TODO
+        this.signText.render(poseStack, buffer, 240, only);
     }
 }
