@@ -1,8 +1,9 @@
 package cn.ussshenzhou.tellmewhere.blockentity;
 
-import cn.ussshenzhou.t88.render.IFixedModelBlockEntity;
+import cn.ussshenzhou.t88.T88;
 import cn.ussshenzhou.t88.render.RawQuad;
-import cn.ussshenzhou.t88.render.SectionCompileContext;
+import cn.ussshenzhou.t88.render.fixedblockentity.IFixedModelBlockEntity;
+import cn.ussshenzhou.t88.render.fixedblockentity.SectionCompileContext;
 import cn.ussshenzhou.t88.util.BlockUtil;
 import cn.ussshenzhou.t88.util.RenderUtil;
 import cn.ussshenzhou.tellmewhere.DirectionUtil;
@@ -13,6 +14,7 @@ import cn.ussshenzhou.tellmewhere.block.BaseSignBlock;
 import cn.ussshenzhou.tellmewhere.util.AlwaysZeroRandomSource;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
@@ -394,8 +396,8 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
     public void renderAdditionalAsync(SectionCompileContext context, PoseStack poseStack) {
         if (this.isMaster()) {
             int l = getPackedLight();
-            renderBackGround(poseStack, getBuilder(context, ModRenderTypes.FILL_COLOR), l);
-            renderTextOnlyImage(poseStack, getSimpleMultiBufferSource(context, RenderType.translucent()), l);
+            renderBackGround(poseStack, context.getVertexConsumer(T88.SODIUM_EXIST ? RenderType.solid() : ModRenderTypes.FILL_COLOR), l);
+            renderTextOnlyImage(poseStack, context.getSimpleMultiBufferSource(RenderType.translucent()), l);
         }
     }
 
@@ -408,18 +410,26 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
     }
 
     @OnlyIn(Dist.CLIENT)
-    private void renderBackGround(PoseStack poseStack, BufferBuilder builder, int packedLight) {
+    private void renderBackGround(PoseStack poseStack, VertexConsumer builder, int packedLight) {
         poseStack.pushPose();
-        resetToBlock000(ModRenderTypes.FILL_COLOR, poseStack);
+        resetToBlock000(T88.SODIUM_EXIST ? RenderType.solid() : ModRenderTypes.FILL_COLOR, poseStack);
         moveToUpLeft(poseStack);
         float x1 = -this.screenLength16 / 16f;
         float y1 = -this.screenHeight16 / 16f;
-        var matrix = poseStack.last().pose();
         poseStack.translate(0, 0, -0.005f);
-        builder.addVertex(matrix, 0, 0, 0).setColor(0, 0, 0, 1).setLight(packedLight);
-        builder.addVertex(matrix, 0, y1, 0).setColor(0, 0, 0, 1).setLight(packedLight);
-        builder.addVertex(matrix, x1, y1, 0).setColor(0, 0, 0, 1).setLight(packedLight);
-        builder.addVertex(matrix, x1, 0, 0).setColor(0, 0, 0, 1).setLight(packedLight);
+        var matrix = poseStack.last().pose();
+        if (T88.SODIUM_EXIST) {
+            builder.addVertex(matrix, 0, 0, 0).setColor(0, 0, 0, 1).setLight(packedLight).setUv(0, 0).setNormal(1, 0, 0);
+            builder.addVertex(matrix, 0, y1, 0).setColor(0, 0, 0, 1).setLight(packedLight).setUv(0, 0).setNormal(1, 0, 0);
+            builder.addVertex(matrix, x1, y1, 0).setColor(0, 0, 0, 1).setLight(packedLight).setUv(0, 0).setNormal(1, 0, 0);
+            builder.addVertex(matrix, x1, 0, 0).setColor(0, 0, 0, 1).setLight(packedLight).setUv(0, 0).setNormal(1, 0, 0);
+        } else {
+            builder.addVertex(matrix, 0, 0, 0).setColor(0, 0, 0, 1).setLight(packedLight);
+            builder.addVertex(matrix, 0, y1, 0).setColor(0, 0, 0, 1).setLight(packedLight);
+            builder.addVertex(matrix, x1, y1, 0).setColor(0, 0, 0, 1).setLight(packedLight);
+            builder.addVertex(matrix, x1, 0, 0).setColor(0, 0, 0, 1).setLight(packedLight);
+        }
+
         poseStack.popPose();
     }
 

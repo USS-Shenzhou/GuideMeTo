@@ -1,6 +1,6 @@
 package cn.ussshenzhou.tellmewhere;
 
-import cn.ussshenzhou.t88.render.SectionBufferRenderType;
+import cn.ussshenzhou.t88.render.fixedblockentity.SectionBufferRenderType;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.renderer.RenderStateShard;
