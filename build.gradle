@@ -118,7 +118,7 @@ dependencies {
             exclude group: "org.sinytra.forgified-fabric-api", module: "fabric-renderer-api-v1"
         }
     } else {
-        def t88FileId = '5727391'
+        def t88FileId = '5727437'
         implementation('curse.maven:t88-663112:' + t88FileId) {
             exclude group: "curse.maven", module: "irisshaders-455508"
             exclude group: "org.sinytra.forgified-fabric-api", module: "fabric-renderer-api-v1"
