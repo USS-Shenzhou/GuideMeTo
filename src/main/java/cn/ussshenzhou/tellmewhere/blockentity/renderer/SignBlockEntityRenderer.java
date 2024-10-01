@@ -34,4 +34,9 @@ public class SignBlockEntityRenderer implements BlockEntityRenderer<SignBlockEnt
         var extra = blockEntity.getBlockState().getValue(BlockStateProperties.FACING).getCounterClockWise().getNormal().multiply(blockEntity.screenLength16 / 16);
         return BlockEntityRenderer.super.getRenderBoundingBox(blockEntity).expandTowards(extra.getX(), extra.getY(), extra.getZ());
     }
+
+    @Override
+    public int getViewDistance() {
+        return 192;
+    }
 }

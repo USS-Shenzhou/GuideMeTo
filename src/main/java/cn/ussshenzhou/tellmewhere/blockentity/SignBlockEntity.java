@@ -418,7 +418,7 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
         moveToUpLeft(poseStack);
         float x1 = -this.screenLength16 / 16f;
         float y1 = -this.screenHeight16 / 16f;
-        poseStack.translate(0, 0, -0.005f);
+        poseStack.translate(0, 0, -0.01f);
         var matrix = poseStack.last().pose();
         if (T88.SODIUM_EXIST) {
             var image = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(ResourceLocation.withDefaultNamespace("missingno"));
@@ -447,7 +447,7 @@ public class SignBlockEntity extends BlockEntity implements IFixedModelBlockEnti
     @OnlyIn(Dist.CLIENT)
     public void renderText(PoseStack poseStack, MultiBufferSource buffer, int packedLight, SignText.BakedType only) {
         moveToUpLeft(poseStack);
-        poseStack.translate(0, -this.screenHeight16 / 2f / 16, -0.007f);
+        poseStack.translate(0, -this.screenHeight16 / 2f / 16, -0.015f);
         poseStack.rotateAround(Axis.ZP.rotation((float) Math.PI), 0, 0, 0);
         poseStack.scale(1f / ImageHelper.IMAGE_SIZE, 1f / ImageHelper.IMAGE_SIZE, 0);
         poseStack.scale(this.screenHeight16 / 16f, this.screenHeight16 / 16f, 0);
