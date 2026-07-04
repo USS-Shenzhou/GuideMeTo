@@ -32,7 +32,7 @@ public class SignBlockEntitySectionRenderer {
                 return;
             }
             event.addRenderer(context -> {
-                context.getBlockRenderer().tesselateBlock((x, y, z, quad, instance) -> context.getOrCreateChunkBuffer(ChunkSectionLayer.TRANSLUCENT).putBlockBakedQuad(x, y, z, quad, instance),
+                context.getBlockRenderer().tesselateBlock((x, y, z, quad, instance) -> context.getOrCreateChunkBuffer(ChunkSectionLayer.CUTOUT).putBlockBakedQuad(x, y, z, quad, instance),
                         blockPos.getX() - sectionOrigin.getX(), blockPos.getY() - sectionOrigin.getY(), blockPos.getZ() - sectionOrigin.getZ(),
                         (BlockAndTintGetter) level, blockPos, signBlockEntity.getDisguiseBlockState(), signBlockEntity.disguiseModel, 42);
             });

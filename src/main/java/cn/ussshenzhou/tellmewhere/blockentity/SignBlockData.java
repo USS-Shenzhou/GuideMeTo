@@ -26,8 +26,8 @@ public class SignBlockData {
     private boolean slave = false;
     private int screenLength16;
     private SignText signText = new SignText();
-    private int backgroundArgb = 0xff000000;
-    private int foregroundArgb = 0xffffffff;
+    private int backgroundArgb = 0xffffffff;
+    private int foregroundArgb = 0xff000000;
 
     public SignBlockData(short light, BlockState disguiseBlockState, boolean slave, int screenLength16, SignText signText, int backgroundArgb, int foregroundArgb) {
         this.light = light;

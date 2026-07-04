@@ -27,7 +27,7 @@ public class MetaPanel extends TVerticalScrollContainer {
 
     private final TLabel presets = new TLabel(Component.translatable("gui.gmt.editor.presets"));
     private static final Style STYLE = Style.EMPTY.withoutShadow();
-    private final ColorButton normal = new ColorButton(Component.translatable("gui.gmt.editor.presets.normal").setStyle(STYLE), 0xffffff, 0x000000);
+    //private final ColorButton normal = new ColorButton(Component.translatable("gui.gmt.editor.presets.normal").setStyle(STYLE), 0xffffff, 0x000000);
     private final ColorButton striking = new ColorButton(Component.translatable("gui.gmt.editor.presets.striking").setStyle(STYLE), 0x000000, 0xfae222);
     private final ColorButton attention = new ColorButton(Component.translatable("gui.gmt.editor.presets.attention").setStyle(STYLE), 0x000000, 0xfa8000);
     private final ColorButton forbid = new ColorButton(Component.translatable("gui.gmt.editor.presets.forbid").setStyle(STYLE), 0x000000, 0xfa0b00);
@@ -35,7 +35,7 @@ public class MetaPanel extends TVerticalScrollContainer {
 
 
     public MetaPanel(int foregroundColor, int backgroundColor) {
-        this.addAll(foreground, background, presets, normal, striking, attention, forbid, reverse);
+        this.addAll(foreground, background, presets, /*normal,*/ striking, attention, forbid, reverse);
         this.setBackground(0);
         this.foreground.getComponent().setValue(String.format("%06X", (0xffffff & foregroundColor)));
         this.background.getComponent().setValue(String.format("%06X", (0xffffff & backgroundColor)));
@@ -46,11 +46,11 @@ public class MetaPanel extends TVerticalScrollContainer {
         foreground.setBounds(4, 4, 60, foreground.getPreferredSize().y);
         LayoutHelper.BBottomOfA(background, 4, foreground);
         presets.setBounds(foreground.getXT() + foreground.getWidth() + 8, 4, presets.getPreferredSize());
-        LayoutHelper.BBottomOfA(normal, 2, presets, 60, 20);
-        LayoutHelper.BRightOfA(striking, 4, normal);
+        LayoutHelper.BBottomOfA(reverse/*normal*/, 2, presets, 60, 20);
+        LayoutHelper.BRightOfA(striking, 4,reverse/*normal*/);
         LayoutHelper.BRightOfA(attention, 4, striking);
         LayoutHelper.BRightOfA(forbid, 4, attention);
-        LayoutHelper.BBottomOfA(reverse, 14, normal);
+        //LayoutHelper.BBottomOfA(reverse, 14, normal);
         super.layout();
     }
 

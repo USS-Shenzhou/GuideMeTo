@@ -4,9 +4,9 @@ import cn.ussshenzhou.t88.util.BlockUtil;
 import cn.ussshenzhou.t88.util.RawQuad;
 import cn.ussshenzhou.t88.util.RenderUtil;
 import cn.ussshenzhou.tellmewhere.ImageHelper;
+import cn.ussshenzhou.tellmewhere.TellMeWhere;
 import cn.ussshenzhou.tellmewhere.block.PillarBlock;
 import cn.ussshenzhou.tellmewhere.util.AlwaysZeroRandomSource;
-import cn.ussshenzhou.tellmewhere.util.ModRenderTypes;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
@@ -15,17 +15,18 @@ import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.block.dispatch.SingleVariant;
-import net.minecraft.client.renderer.block.model.*;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.SimpleModelWrapper;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.client.resources.model.geometry.QuadCollection;
 import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -42,6 +43,8 @@ import java.util.function.Consumer;
  */
 @ParametersAreNonnullByDefault
 public class SignBlockEntityRenderer implements BlockEntityRenderer<SignBlockEntity, SignBlockEntityRenderState> {
+
+    public static final Identifier BACKGROUND = Identifier.fromNamespaceAndPath(TellMeWhere.MODID, "block/background");
 
     public SignBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
     }
@@ -80,16 +83,20 @@ public class SignBlockEntityRenderer implements BlockEntityRenderer<SignBlockEnt
         }
     }
 
+    @SuppressWarnings("deprecation")
     private static void renderBackGround(SignBlockEntity thiz, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight) {
         poseStack.pushPose();
         float x1 = -thiz.getScreenLength16() / 16f;
         float y1 = -thiz.screenHeight16 / 16f;
         poseStack.translate(0, 0, -0.01f);
-        submitNodeCollector.submitCustomGeometry(poseStack, ModRenderTypes.BACKGROUND, (pose, buffer) -> {
-            buffer.addVertex(pose, 0, 0, 0).setColor(thiz.data.getBackgroundArgb()).setLight(packedLight);
-            buffer.addVertex(pose, 0, y1, 0).setColor(thiz.data.getBackgroundArgb()).setLight(packedLight);
-            buffer.addVertex(pose, x1, y1, 0).setColor(thiz.data.getBackgroundArgb()).setLight(packedLight);
-            buffer.addVertex(pose, x1, 0, 0).setColor(thiz.data.getBackgroundArgb()).setLight(packedLight);
+        var image = ((TextureAtlas) Minecraft.getInstance().getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS)).getSprite(BACKGROUND);
+        var color = thiz.data.getBackgroundArgb();
+        submitNodeCollector.submitCustomGeometry(poseStack, RenderTypes.solidMovingBlock(), (pose, buffer) -> {
+            buffer.addVertex(pose, 0, 0, 0).setColor(color).setUv(image.getU0(), image.getV0()).setLight(packedLight).setNormal(1, 0, 0);
+            buffer.addVertex(pose, 0, y1, 0).setColor(color).setUv(image.getU0(), image.getV1()).setLight(packedLight).setNormal(1, 0, 0);
+            buffer.addVertex(pose, x1, y1, 0).setColor(color).setUv(image.getU1(), image.getV1()).setLight(packedLight).setNormal(1, 0, 0);
+            buffer.addVertex(pose, x1, 0, 0).setColor(color).setUv(image.getU1(), image.getV0()).setLight(packedLight).setNormal(1, 0, 0);
+
         });
         poseStack.popPose();
     }

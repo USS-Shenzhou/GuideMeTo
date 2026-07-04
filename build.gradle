@@ -89,7 +89,7 @@ dependencies {
     jarJar(group: 'net.objecthunter', name: 'exp4j', version: '[0.4,0.5)')
 
     //implementation fg.deobf("curse.maven:shimmer-627824:4676467")
-    implementation(annotationProcessor("cn.ussshenzhou:t88:26+"))
+    implementation(annotationProcessor("cn.ussshenzhou:t88:26.1+"))
 
 
     // Example mod dependency with JEI
