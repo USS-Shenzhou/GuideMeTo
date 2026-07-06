@@ -47,7 +47,7 @@ public class MetaPanel extends TVerticalScrollContainer {
         LayoutHelper.BBottomOfA(background, 4, foreground);
         presets.setBounds(foreground.getXT() + foreground.getWidth() + 8, 4, presets.getPreferredSize());
         LayoutHelper.BBottomOfA(reverse/*normal*/, 2, presets, 60, 20);
-        LayoutHelper.BRightOfA(striking, 4,reverse/*normal*/);
+        LayoutHelper.BRightOfA(striking, 4, reverse/*normal*/);
         LayoutHelper.BRightOfA(attention, 4, striking);
         LayoutHelper.BRightOfA(forbid, 4, attention);
         //LayoutHelper.BBottomOfA(reverse, 14, normal);
@@ -63,6 +63,11 @@ public class MetaPanel extends TVerticalScrollContainer {
     }
 
     public int parse(String colorString, int defaultValue) {
+        try {
+            Integer.parseInt(colorString, 16);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
         return switch (colorString.length()) {
             case 3 -> ARGB.color(
                     duplicateDigit(Integer.parseInt(colorString, 0, 1, 16)),
