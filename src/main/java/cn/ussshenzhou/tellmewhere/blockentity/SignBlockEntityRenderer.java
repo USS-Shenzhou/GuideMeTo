@@ -218,6 +218,11 @@ public class SignBlockEntityRenderer implements BlockEntityRenderer<SignBlockEnt
         var blockModel = Minecraft.getInstance().getModelManager().getBlockStateModelSet().get(thiz.getDisguiseBlockState());
         List<BakedQuad> quadList = new ArrayList<>();
         Direction front = getFacing(thiz);
+        if (front == Direction.UP) {
+            front = Direction.NORTH;
+        } else if (front == Direction.DOWN) {
+            front = Direction.SOUTH;
+        }
         handleQuads(thiz, blockModel, front, r -> handleFront(thiz, r), quadList);
         front = front.getCounterClockWise();
         handleQuads(thiz, blockModel, front, r -> handleRight(thiz, r), quadList);
