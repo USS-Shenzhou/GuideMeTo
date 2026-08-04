@@ -100,6 +100,8 @@ public class ImageHelper {
         registerGoogle(268, "land");
         registerGoogle(269, "gondola_lift");
         registerGoogle(270, "elevator");
+        registerGoogle(271, "escalator");
+        registerGoogle(272, "stairs");
 
         registerGoogle(280, "bathroom");
         registerGoogle(281, "baby_changing_room");
