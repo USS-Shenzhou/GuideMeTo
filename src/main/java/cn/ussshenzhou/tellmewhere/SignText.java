@@ -3,19 +3,15 @@ package cn.ussshenzhou.tellmewhere;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.serialization.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.ActiveTextCollector;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.TextAlignment;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
-import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.util.FormattedCharSequence;
-import net.neoforged.fml.LogicalSide;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.util.thread.EffectiveSide;
 
@@ -41,7 +37,7 @@ public class SignText {
     public SignText(Map<String, String> rawTexts) {
         this();
         this.rawTexts = rawTexts;
-        if (EffectiveSide.get().isClient()) {
+        if (FMLEnvironment.getDist().isClient()) {
             bakeTexts();
         }
     }
